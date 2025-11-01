@@ -1,0 +1,11 @@
+# for this requirements, use python 3.10.19
+qiskit==1.1.0
+qiskit-aer==0.16.1
+qiskit-algorithms==0.3.1
+qiskit-ibm-runtime==0.29.0
+qiskit-nature==0.7.2
+qiskit-optimization==0.6.1
+scipy==1.15.2
+pandas==2.2.2
+matplotlib==3.9.2
+scikit-learn==1.5.1
