@@ -38,7 +38,7 @@ mkdir "$coverage_report_initial_dir/jmh/"
 ./gradlew jmhJar
 
 # execute jar file to run benchmarks
-java -javaagent:$jacoco_agent_path=destfile=jacoco_exec_path_jmh,jmx=true,excludes=packages_to_exclude_jacoco -jar $jar_path $jmh_args -jvmArgs "-javaagent:$jacoco_agent_path=destfile=$jacoco_exec_path_jmh,jmx=true,excludes=$packages_to_exclude_jacoco" -prof $profiler_class_name
+java -javaagent:$jacoco_agent_path=destfile=$jacoco_exec_path_jmh,jmx=true,excludes=packages_to_exclude_jacoco -jar $jar_path $jmh_args -jvmArgs "-javaagent:$jacoco_agent_path=destfile=$jacoco_exec_path_jmh,jmx=true,excludes=$packages_to_exclude_jacoco" -prof $profiler_class_name
 
 # custom gradle task to easy execute jacoco report for jmh
 ./gradlew jacocoExternalReport

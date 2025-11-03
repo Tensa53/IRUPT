@@ -37,8 +37,12 @@ benchmarks=(
 
 # Path to JMH benchmarks
 JAR_PATH="build/libs/GradleProjectJ4-1.0-SNAPSHOT-jmh.jar"
+# JMH arguments
 COMMON_ARGS="-f 10 -i 3000 -wi 0 -bm ss -tu ms"
+# Path to save json output
 REPORT_PATH="reports-time/jmh/"
+# Normal user to change ownership of output files
+NORMAL_USER="daniele"
 
 # Random execution loop
 remaining_benchmarks=("${benchmarks[@]}")
@@ -65,8 +69,10 @@ for ((i = 0; i < total; i++)); do
   mkdir -p "$REPORT_PATH/$class_name"
 
   echo "  -> Execution $i: running benchmark"
-  nice -n -20 java -Xms8G -Xmx8G -jar "$JAR_PATH" "$bm"  $COMMON_ARGS -rff "$class_name/$method_name-benchmark-results.json" -rf json
+  nice -n -20 java -Xms8G -Xmx8G -jar "$JAR_PATH" "$bm"  $COMMON_ARGS -rff "$REPORT_PATH/$class_name/$method_name-benchmark-results.json" -rf json
 done
+
+chown -R $NORMAL_USER:$NORMAL_USER $REPORT_PATH
 
 echo ">>> All benchmarks executed"
 echo ">>> Finished."
