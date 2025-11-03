@@ -50,6 +50,8 @@ This phase can be automated by the scripts located in the **scripts/** folder:
 - **run_microbenchmarks.sh**: automated the steps of this phase, to retrieve the data from the micro-benchmarks of a Jar file;
 - **restore_system.sh**: restore all the services previously stopped.
 
+Before executing these script, they must be copied inside the root folder of the software to be analyzed.
+
 ### 2. Data Processing
 Once obtained the initial data, the data are processed to the correct format used by the algorithms that optimize the selection.
 The **dataprep.py** module contains different functions to process the data:
@@ -139,7 +141,7 @@ To execute this algorithm run these command inside the folder:
 > python select_qaoa.py noise #noise simulator
 
 This phase can be automated by the **run_algorithms.sh** script located in the **scripts/** folder, that also automates
-the third phase.
+the data processing phase.
 
 ### 4. Obtained Results
 TO-DO
