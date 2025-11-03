@@ -1,9 +1,12 @@
 #!/bin/sh
 
-echo ">>> Re-enabling Turbo Boost"
-echo 0 | sudo /usr/bin/tee /sys/devices/system/cpu/intel_pstate/no_turbo
-echo ">>> Re-enabling Hyper-Threading"
+#echo ">>> Re-enabling Turbo Boost (Intel CPUs)"
+#echo 0 | sudo /usr/bin/tee /sys/devices/system/cpu/intel_pstate/no_turbo
+#echo ">>> Re-enabling Hyper-Threading (Intel CPUs)"
 #for cpu in {0..7}; do echo 1 | sudo /usr/bin/tee /sys/devices/system/cpu/cpu$cpu/online; done
+echo ">>> Re-enabling Precision Boost (AMD CPUs)"
+echo 1 | sudo tee /sys/devices/system/cpu/cpufreq/boost
+echo ">>> Re-enabling Simultaneous MultiThreading (AMD CPUs)"
 echo on | sudo tee /sys/devices/system/cpu/smt/control
 echo ">>> Re-enabling ASLR"
 echo 2 | sudo /usr/bin/tee /proc/sys/kernel/randomize_va_space

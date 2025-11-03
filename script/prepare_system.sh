@@ -1,9 +1,12 @@
 #!/bin/sh
 
-echo ">>> Disabling Turbo Boost"
-echo 1 | sudo /usr/bin/tee /sys/devices/system/cpu/intel_pstate/no_turbo
-echo ">>> Disabling Hyper-Threading"
+#echo ">>> Disabling Turbo Boost (Intel CPUs)"
+#echo 1 | sudo /usr/bin/tee /sys/devices/system/cpu/intel_pstate/no_turbo
+#echo ">>> Disabling Hyper-Threading (Intel CPUs)"
 #for cpu in {0..7}; do echo 0 | sudo /usr/bin/tee /sys/devices/system/cpu/cpu$cpu/online; done
+echo ">>> Disabling Precision Boost (AMD CPUs)"
+echo 0 | sudo tee /sys/devices/system/cpu/cpufreq/boost
+echo ">>> Disabling Simultaneous MultiThreading (AMD CPUs)"
 echo off | sudo tee /sys/devices/system/cpu/smt/control
 echo ">>> Disabling ASLR"
 echo 0 | sudo /usr/bin/tee /proc/sys/kernel/randomize_va_space

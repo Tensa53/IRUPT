@@ -1,6 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 # List of fully qualified benchmark names
+# Easy way to extract names with command: java -jar <jar_name> -l
 benchmarks=(
   "benchmarks.UtenteBenchmark.benchGetName"
   "benchmarks.UtenteBenchmark.benchGetSurname"
@@ -36,14 +37,14 @@ benchmarks=(
 
 # Path to JMH benchmarks
 JAR_PATH="build/libs/GradleProjectJ4-1.0-SNAPSHOT-jmh.jar"
-PROJECT_NAME="GradleProjectJ4"
 COMMON_ARGS="-f 10 -i 3000 -wi 0 -bm ss -tu ms"
+REPORT_PATH="reports-time/jmh/"
 
 # Random execution loop
 remaining_benchmarks=("${benchmarks[@]}")
 total=${#remaining_benchmarks[@]}
 
-mkdir -p "$PROJECT_NAME"
+mkdir -p "$REPORT_PATH"
 
 # Main loop
 for ((i = 0; i < total; i++)); do
@@ -61,10 +62,10 @@ for ((i = 0; i < total; i++)); do
   method_name=$(echo "$bm" | awk -F'.' '{print $NF}')
 
   #output_dir="$class_name/$method_name"
-  mkdir -p "$PROJECT_NAME/$class_name"
+  mkdir -p "$REPORT_PATH/$class_name"
 
   echo "  -> Execution $i: running benchmark"
-  nice -n -20 java -Xms8G -Xmx8G -jar "$JAR_PATH" "$bm"  $COMMON_ARGS -rff "$PROJECT_NAME/$class_name/$method_name-benchmark-results.json" -rf json
+  nice -n -20 java -Xms8G -Xmx8G -jar "$JAR_PATH" "$bm"  $COMMON_ARGS -rff "$class_name/$method_name-benchmark-results.json" -rf json
 done
 
 echo ">>> All benchmarks executed"
