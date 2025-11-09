@@ -12,6 +12,18 @@ class DataPrep:
         self.mergedDataInitialPath = mergedDataInitialPath
         self.program = ""
 
+    def pretty_line_print(self, file_path, dictionary):
+        with open(file_path, "w") as text_file:
+            text_file.write("{\n")
+            items = list(dictionary.items())
+            for i, (key, value) in enumerate(items):
+                json_pair = json.dumps(str(key)) + ":" + json.dumps(value)
+                if i < len(items) - 1:
+                    text_file.write("  " + json_pair + ",\n")
+                else:
+                    text_file.write("  " + json_pair + "\n")
+            text_file.write("}")
+
     def coverage_matrix_split_covered_lines_in_multiple_list_items(self):
         coverage_matrix = json.load(open(f"{self.rawDataInitialPath}{self.program}/coverage-matrix.json"))
 
@@ -29,7 +41,7 @@ class DataPrep:
                     newMethod = methodSig + "{" + methodLine + ";}"
                     coverage_matrix[coverage_matrix_key].append(newMethod)
 
-        json.dump(coverage_matrix, open(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line_str.json", "w"))
+        self.pretty_line_print(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line_str.json", coverage_matrix)
 
     def coverage_matrix_splitted_reverse(self):
         coverage_matrix_split = json.load(open(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line_str.json"))
@@ -49,7 +61,7 @@ class DataPrep:
                 if methodLinesAllDictUniqueKey in coverage_matrix_split[testkey]:
                     methodLinesAllDictUnique[methodLinesAllDictUniqueKey].append(testkey)
 
-        json.dump(methodLinesAllDictUnique, open(f"{self.processedDataInitialPath}{self.program}/executed_lines_test_by_test.json", "w"))
+        self.pretty_line_print(f"{self.processedDataInitialPath}{self.program}/executed_lines_test_by_test.json", methodLinesAllDictUnique)
 
     def map_testcases_to_number(self):
         tests = json.load(open(f"{self.rawDataInitialPath}{self.program}/report.json"))
@@ -61,7 +73,10 @@ class DataPrep:
             test_number[test] = i
             i += 1
 
-        json.dump(test_number, open(f"{self.processedDataInitialPath}{self.program}/testcases-number.json", "w"))
+        self.pretty_line_print(f"{self.processedDataInitialPath}{self.program}/testcases-number.json", test_number)
+
+    def map_lines_to_hash(self):
+        pass
 
     def map_coverage_matrix_split_keys_to_testcase_number(self):
         coverage_matrix = json.load(open(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line_str.json"))
@@ -74,7 +89,7 @@ class DataPrep:
             number = testcase_to_number[test]
             coverage_matrix_numbers[number] = coverage_matrix[test]
 
-        json.dump(coverage_matrix_numbers, open(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line.json", "w"))
+        self.pretty_line_print(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line.json", coverage_matrix_numbers)
 
     def map_time_report_to_testcase_number(self):
         times = json.load(open(f"{self.rawDataInitialPath}{self.program}/report.json"))
@@ -86,7 +101,7 @@ class DataPrep:
             number = testcase_to_number[testcase]
             test_times_to_number[number] = float(times[testcase])
 
-        json.dump(test_times_to_number, open(f"{self.processedDataInitialPath}{self.program}/test_cases_costs.json", "w"))
+        self.pretty_line_print(f"{self.processedDataInitialPath}{self.program}/test_cases_costs.json", test_times_to_number)
 
     def plain_from_coverage_matrix_splitted(self):
         coverage_matrix = json.load(open(f"{self.processedDataInitialPath}{self.program}/test_coverage_line_by_line_str.json"))
