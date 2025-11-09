@@ -16,12 +16,12 @@ packages_to_exclude_cloc="benchmarks,runners"
 source_code_path="src/main/java/org/example"
 
 # create initial directory
-mkdir $coverage_report_initial_dir
+mkdir -p $coverage_report_initial_dir
 
 # commands to generate jacoco report and coverage matrix from junit tests
 # create subfolders for report from junit
-mkdir "$coverage_report_initial_dir/junit/"
-mkdir $time_report_junit_dir
+mkdir -p "$coverage_report_initial_dir/junit/"
+mkdir -p $time_report_junit_dir
 
 # maven commands
 mvn clean
@@ -32,7 +32,7 @@ cp -r $jacoco_initial_report_path "$coverage_report_initial_dir/junit/"
 
 # commands to generate jacoco report and coverage matrix from jmh benchmarks
 #create subfolder for report from jmh
-mkdir "$coverage_report_initial_dir/jmh/"
+mkdir -p "$coverage_report_initial_dir/jmh/"
 
 # execute jar file to run benchmarks
 java -javaagent:$jacoco_agent_path=destfile=$jacoco_exec_path_jmh,jmx=true,excludes=packages_to_exclude_jacoco -jar $jar_path $jmh_args -jvmArgs "-javaagent:$jacoco_agent_path=destfile=$jacoco_exec_path_jmh,jmx=true,excludes=$packages_to_exclude_jacoco" -prof $profiler_class_name
