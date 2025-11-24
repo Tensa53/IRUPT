@@ -22,11 +22,11 @@ Some software will be chosen to retrieve the data and compute the metrics. The *
 necessary code, organized in packages, that is necessary to add to the software to analyze it and collect the data:
 - **benchmarks/**: contains all the micro-benchmarks created;
   - **profiler/**: contains the classes to collect data from micro-benchmarks;
-    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream, to an .exec file, for each test method;
+    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each test method;
     - **JaCoCoProfiler.java**: intercept the end of an iteration of a micro-benchmark method to call JaCoCoSplitter;
 - **test/**: contains all the unit-test created;
   - **listener/**: contains the classes to collect data from unit-tests;
-    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream, to an .exec file, for each test method;
+    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each test method;
     - **JaCoCoListener.java**: intercept the end of an execution of a unit-test method to call JaCoCoSplitter;
 
 Doing a complete build (mvn clean install) of the system during this phase, gives in output the following files
@@ -41,6 +41,7 @@ directory. In order to collect all the data from the micro-benchmarks, two execu
 coverage data;
 2. **Execution for execution times**: the micro-benchmarks are executed with a complete configuration, to collect the
 execution times.
+
 For these two executions, there are scripts described below.
 
 This phase is supported by the scripts located in the **scripts/** folder:
@@ -103,9 +104,9 @@ This step give in output the following files for each analyzed program and place
   - **classlines_number.json**;
   - **test_coverage_line_by_line.json**
   - **test_cases_costs.json**;
-  - **<ProgramName>_costs.txt**
-  - **<ProgramName>_coverage.txt**
-  - **<ProgramName>.csv**
+  - **ProgramName_costs.txt**
+  - **ProgramName_coverage.txt**
+  - **ProgramName.csv**
 
 The json files are merged together for all programs and placed in **data/merged/** folder:
   - **executed_lines_test_by_test_all_programs.json**;
