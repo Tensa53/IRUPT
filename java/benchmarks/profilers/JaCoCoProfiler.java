@@ -1,4 +1,4 @@
-package benchmarks.profilers;
+package org.example.benchmarks.profilers;
 
 import org.openjdk.jmh.infra.BenchmarkParams;
 import org.openjdk.jmh.infra.IterationParams;
@@ -6,8 +6,12 @@ import org.openjdk.jmh.profile.InternalProfiler;
 import org.openjdk.jmh.results.IterationResult;
 import org.openjdk.jmh.results.Result;
 import org.openjdk.jmh.runner.IterationType;
+
 import java.util.Collection;
 import java.util.Collections;
+
+import static org.example.benchmarks.profilers.JaCoCoCoverageMatrix.updateCoverageMatrix;
+import static org.example.benchmarks.profilers.JaCoCoSplit.writeExecutionData;
 
 public class JaCoCoProfiler implements InternalProfiler {
     @Override
@@ -27,13 +31,14 @@ public class JaCoCoProfiler implements InternalProfiler {
     @Override
     public Collection<? extends Result<?>> afterIteration(BenchmarkParams benchmarkParams, IterationParams iterationParams,
                                                           IterationResult result) {
-        System.out.println("Iteration finished for " + benchmarkParams.getBenchmark());
 
         String benchmarkFqn = benchmarkParams.getBenchmark();
 
         IterationType type = iterationParams.getType();
 
         if (type == IterationType.MEASUREMENT && iterationCounter == iterationParams.getCount()) {
+            System.out.println("\n All iteration finished for:" + benchmarkFqn);
+
             int lastDot = benchmarkFqn.lastIndexOf('.');
             String className = benchmarkFqn.substring(0, lastDot);
             String methodName = benchmarkFqn.substring(lastDot + 1);
@@ -58,7 +63,7 @@ public class JaCoCoProfiler implements InternalProfiler {
 
             }
 
-            JaCoCoCoverageMatrix.updateCoverageMatrix(methodName, className, "reports-coverage/jmh/", "build/jacoco/bench.exec", "build/classes/java/main");
+            writeExecutionData(methodName, className, "target/jacoco-jmh/");
         }
 
         return Collections.emptyList();

@@ -1,6 +1,6 @@
-# IRUPT
+# ERUPT
 
-**IRUPT** (**I**nvestigating the **R**ole of **U**nit Tests for **P**erformance Regression **T**esting Optimization)
+**ERUPT** (**E**xploring the **R**ole of **U**nit tests for **P**erformance regression **T**esting optimization)
 is a study that analyzes how unit tests metrics (statement coverage and execution times) can support the optimization 
 of a regression testing campaign in the context of Performance Testing.
 
@@ -10,81 +10,102 @@ of a regression testing campaign in the context of Performance Testing.
 In order to execute the next phases of the workflow, a setup of the execution environment is necessary. 
 
 For the Java classes, there is a configuration file inside the **java/** folder, for each build system.
-Starting from the initial configuration file, it has to be adapted to the correspondent configuration file of the analyzed software. 
-The Java package structure described on the next phase, is working for a Maven Project. For a Gradle Project there are some
-slightly differences and is then necessary to duplicate some classes. For more info on the Java package structure, it is
-possible to replicate the structure of the example projects, available on [MavenProjectJ4](https://github.com/Tensa53/MavenProjectJ4) 
-and [GradleProjectJ4](https://github.com/Tensa53/GradleProjectJ4) repos.
+Starting from the initial configuration file, it has to be adapted to the one of the analyzed software. 
+The Java package structure described on the next phase, is working for a Maven Project.
 
 For the Python modules and algorithms, there is a requirements.txt inside the root of this repository.
 
-DIV-GA algorithms requires MATLAB 2025a and Global Optimization Toolbox.
+DIV-GA algorithms requires MATLAB R2025a and Global Optimization Toolbox.
 
 ### 1. Data Collection
 Some software will be chosen to retrieve the data and compute the metrics. The **java/** folder contains all the
 necessary code, organized in packages, that is necessary to add to the software to analyze it and collect the data:
 - **benchmarks/**: contains all the micro-benchmarks created;
   - **profiler/**: contains the classes to collect data from micro-benchmarks;
-    - **JaCoCoAppender.java**: appends the execution data of JaCoCo from the JMX Agent Stream, to the .exec file;
-    - **JaCoCoCoverageMatrix.java**: gets the coverage data from the JMX Agent of JaCoCo, to build a coverage matrix;
-    - **JaCoCoProfiler.java**: intercept the end of an iteration of a micro-benchmarks to call JaCoCoCoverageMatrix;
-    - **MethodSignatureRetriever.java**: parse the current class, to retrieve the method signature at the given line;
+    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream, to an .exec file, for each test method;
+    - **JaCoCoProfiler.java**: intercept the end of an iteration of a micro-benchmark method to call JaCoCoSplitter;
 - **test/**: contains all the unit-test created;
-  - **listener/**: contains the JUnit listeners;
-    - **JaCoCoListener.java**: intercept the end of an execution of a unit-test to call JaCoCoCoverageMatrix;
-- **runners/**: contains custom classes called after the test phase of the system;
-  - **JaCoCoXMLUncoveredMethods.java**: reads the JaCoCo XML Report and parses the signature of uncovered methods from tests;
-  - **AverageSingleShotTime.java**: reads the JMH Json Report and extracts the average single shot time of all micro-benchmarks;
-  - **SurefireXMLExecutionTimes.java**: reads the Surefire XML Report and extracts the execution time of all unit tests.
+  - **listener/**: contains the classes to collect data from unit-tests;
+    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream, to an .exec file, for each test method;
+    - **JaCoCoListener.java**: intercept the end of an execution of a unit-test method to call JaCoCoSplitter;
 
-This phase gives in output the following files for each analyzed program and placed in **data/raw/** folder:
+Doing a complete build (mvn clean install) of the system during this phase, gives in output the following files
+for each analyzed software and placed in sub folders of the target directory:
+- **target/**:
+  - **jacoco-junit/**: contains the .exec file, for each single unit-test method overall coverage;
+  - **surefire-reports/**: contains the .xml file, for each single unit-test method execution time.
+
+After the build is completed, the micro-benchmarks can be executed through the shaded jar created in the target 
+directory. In order to collect all the data from the micro-benchmarks, two executions are necessary:
+1. **Execution for coverage data**: the micro-benchmarks are executed with a minimal configuration, to collect the
+coverage data;
+2. **Execution for execution times**: the micro-benchmarks are executed with a complete configuration, to collect the
+execution times.
+For these two executions, there are scripts described below.
+
+This phase is supported by the scripts located in the **scripts/** folder:
+- **generate_reports.sh**: generates a JaCoCo report for each single .exec file of the test methods;
+- **merge_execs_reports.sh**: generate an overall JaCoCo report, merging all the .exec files of the test methods;
+- **custom_jar.sh**: creates a custom jar, in case the shade plugin did not add BenchmarkList and CompilerHints file;
+- **run_benchs_for_coverage.sh**: run the micro-benchmarks to collect coverage data;
+- **prepare_system.sh**: stops unnecessary services of the operating system, to run micro-benchmarks in best conditions;
+- **run_benchs_for_times.sh**: run the micro-benchmarks to collect the execution times data;
+- **restore_system.sh**: restore the services previously stopped.
+
+Before executing these script, they must be copied inside the root folder of the software to be analyzed. The firs two
+scripts are intended to be executed after each test run for the coverage (after the build of the system and after
+executing the run_benchs_for_coverage.sh script)
+
+### 2. Data Preparing
+Once obtained the initial data, the data are prepared to the correct format used by the algorithms that optimize 
+the selection. In this phase, 'Program' is used as a synonymum for 'Software'. In order to correctly prepare data
+the raw data needs to be placed inside the **data/raw/** folder:
 - **ProgramName/**:
-  - **coverage-matrix.json**;
-  - **report.json**;
-  - **total-lines.json**.
+  - **junit/**:
+    - **jacoco-junit-xml/**: contains the .xml report for every unit test method coverage data;
+    - **surefire-reports/**: contains the .xml report for every unit test method execution time;
+    - **total-lines.json**: contains the number of source code line for the analyzed software component.
+  - **jmh/**:
+    - **jacoco-jmh-xml/**: contains the .xml report for every micro-benchmark method coverage data;
+    - **time-reports/**: contains the .xml report for every micro-benchmark method execution time;
+    - **total-lines.json**: contains the number of source code line for the analyzed software component.
 
-This phase can be automated by the scripts located in the **scripts/** folder:
-- **run_coverage_gradle.sh**: automates the steps of this phase, to retrieve the data from the unit-test of a Gradle project;
-- **run_coverage_maven.sh**: automates the steps of this phase, to retrieve the data from the unit-test of a Maven project;
-- **prepare_system.sh**: disable all unnecessary services of the operating system, to run the micro-benchmarks in the best conditions;
-- **run_microbenchmarks.sh**: automated the steps of this phase, to retrieve the data from the micro-benchmarks of a Jar file;
-- **restore_system.sh**: restore all the services previously stopped.
-
-Before executing these script, they must be copied inside the root folder of the software to be analyzed.
-
-### 2. Data Processing
-Once obtained the initial data, the data are processed to the correct format used by the algorithms that optimize the selection.
-The **dataprep.py** module contains different functions to process the data:
-1. **coverage_matrix_split_covered_lines_in_multiple_list_items**: given the coverage-matrix.json file, splits the elements of a row, 
-to have a new representation that for every test case, shows the correspondent covered methods single line
-2. **coverage_matrix_splitted_reverse**: given the output of the previous function, reverses the matrix, to have a new representation
-that for every line, shows the correspondent test cases;
-3. **map_testcases_to_number**: given the report.json file, maps every testcase name to a numerical identifier;
-4. **map_coverage_matrix_split_keys_to_testcase_number**: given the transformed matrix by the first function, changes 
-the testcases name to the mapped numerical identifiers;
-5. **map_time_report_to_testcase_number**: given the report.json file and the testcases name mapping to numerical id, maps the
-execution time of a test case to the numerical identifier of the test case;
-6. **plain_from_coverage_matrix_splitted**: given the transformed matrix by the first function, converts the matrix in a
-plain text (.txt) format, where every line number is the numerical identifier of a test case and the line content is the
-list of covered method lines by the test;
-7. **plain_from_time_report**: given the report.json file, converts the time report in a plain text file (.txt), where every
-element is an execution time and its position maps the numerical identifier of the test case;
-8. **csv_from_coverage_matrix_splitted_and_time_report**: given the report.json file and the transformed matrix by the 
-first function, creates a table format file (.csv), with the execution times
-of every test case and the correspondent statement coverage percentage;
-9. **merge**: the **total-lines.json** file and each output of the previous functions (except the .txt and .csv ones) to create
-various final json files with every programs data.
+The **dataprep.py** module contains different functions to prepare the data:
+1. **create_coverage_matrix**: given the raw data for coverage, create a coverage matrix json file, such that a key
+represents the test case method and the value a list of class lines covered by the test case method;
+2. **create_time_matrix**: given the raw data for execution times, creat a time matrix json file, such that a key
+represents the test case method and the value the execution time of that test case method;
+3. **coverage_matrix_reverse**: given the coverage matrix, reverses it to have a new representation that for 
+every class line, shows the correspondent test cases;
+3. **map_testcases_to_number**: given the time matrix, maps every test case name to a numerical identifier;
+4. **maps_classlines_to_number**: given the coverage matrix, maps every class line to a numerical identifier;
+4. **map_coverage_matrix_keys_to_testcase_number**: given the coverage matrix, changes the test case name key to the 
+mapped numerical identifiers;
+5. **map_time_matrix_keys_to_testcase_number**: given the time matrix, changes the test case name key to the mapped
+numerical identifiers;
+6. **plain_from_coverage_matrix**: given the coverage matrix, converts it in a plain text (.txt) format, where every 
+line number is the numerical identifier of a test case and the line content is the list of covered class lines;
+7. **plain_from_time_matrix**: given the time matrix, converts it in a plain text file (.txt), where every element is an
+execution time and its position maps the numerical identifier of the test case;
+8. **csv_from_coverage_matrix_and_time_matrix**: given the coverage matrix and time matrix, creates a table format file
+(.csv), with the execution times of every test case and the correspondent line coverage percentage;
+9. **merge**: each output of the previous functions (except the .txt and .csv ones) and the **total-lines.json** file 
+are merged to create various final json files with every software data.
+10. **search_covered_method_lines**: given the coverage matrix reversed and a list of class lines, searches if a line
+is covered by a test case, filtering the coverage matrix reversed.
 
 This step give in output the following files for each analyzed program and placed in **data/processed/** folder:
 - **ProgramName/**:
-  - **test_coverage_line_by_line_str.json**;
-  - **executed_lines_test_by_test.json**;
-  - **testcases-number.json**
-  - **test_coverage_line_by_line.json**;
+  - **coverage_matrix.json**;
+  - **time_matrix.json**;
+  - **coverage_matrix_reversed.json**
+  - **testcases_number.json**
+  - **classlines_number.json**;
+  - **test_coverage_line_by_line.json**
   - **test_cases_costs.json**;
-  - **\<ProgramName>_costs.txt**
-  - **\<ProgramName>_coverage.txt**
-  - **\<ProgramName>.csv**
+  - **<ProgramName>_costs.txt**
+  - **<ProgramName>_coverage.txt**
+  - **<ProgramName>.csv**
 
 The json files are merged together for all programs and placed in **data/merged/** folder:
   - **executed_lines_test_by_test_all_programs.json**;
@@ -92,7 +113,11 @@ The json files are merged together for all programs and placed in **data/merged/
   - **test_cases_costs_all_programs.json**;
   - **total_program_lines_all_programs.json**.
 
-This phase can be automated by the **dataprep.py** script located in the **data/** folder.
+This phase can be automated by the **dataprep.py** script located in the **data/** folder. To execute this script run
+these commands inside the folder:
+> python dataprep.py junit #to prepare data from junit raw data
+> 
+> python dataprep.py jmh #to prepare data from jmh raw data
 
 ### 3. Algorithms Execution
 The data are ready to be used as input for the chosen algorithms that are placed in **algorithms/** folder:
