@@ -1,0 +1,17 @@
+{
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableRequestFieldsLines565To575":0,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableSuccessFlagLines573To579":1,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithHookFailureRollback":2,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithHookSuccess":3,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithNullEnvironmentContext":4,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithNullValidWriteIds":5,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithProcessorCapabilities":6,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithValidWriteIds":7,
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithoutHookLoader":8,
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsPartitionKeySeparatorLogic":9,
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithComplexPartitionTypes":10,
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithEmptyPartitionKeyName":11,
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithMultiplePartitionKeys":12,
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithNoPartitionKeys":13,
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithSinglePartitionKey":14
+}

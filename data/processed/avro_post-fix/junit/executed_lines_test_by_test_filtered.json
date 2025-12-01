@@ -1,0 +1,13 @@
+{
+  "org.apache.avro.data.RecordBuilderBase{72;}":["no tests"],
+  "org.apache.avro.data.RecordBuilderBase{73;}":["no tests"],
+  "org.apache.avro.data.RecordBuilderBase{74;}":["no tests"],
+  "org.apache.avro.data.RecordBuilderBase{75;}":["no tests"],
+  "org.apache.avro.data.RecordBuilderBase{76;}":["no tests"],
+  "org.apache.avro.data.RecordBuilderBase{77;}":["no tests"],
+  "org.apache.avro.data.RecordBuilderBase{78;}":["no tests"],
+  "org.apache.avro.util.Utf8{64;}":["org.apache.avro.util.TestUtf8.testCopyConstructorWithCachedString"],
+  "org.apache.avro.util.Utf8{65;}":["org.apache.avro.util.TestUtf8.testCopyConstructorWithCachedString"],
+  "org.apache.avro.util.Utf8{115;}":["org.apache.avro.util.TestUtf8.testArrayExpandedWhenSmallerThanRequestedSize", "org.apache.avro.util.TestUtf8.testArrayReusedWhenLargerThanRequestedSize"],
+  "org.apache.avro.util.Utf8{116;}":["org.apache.avro.util.TestUtf8.testArrayExpandedWhenSmallerThanRequestedSize"]
+}

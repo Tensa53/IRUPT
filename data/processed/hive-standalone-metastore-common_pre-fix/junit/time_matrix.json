@@ -1,0 +1,17 @@
+{
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableRequestFieldsLines565To575":"0",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableSuccessFlagLines573To579":"0.001",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithHookFailureRollback":"0.002",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithHookSuccess":"0.008",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithNullEnvironmentContext":"0.001",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithNullValidWriteIds":"0.001",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithProcessorCapabilities":"0.001",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithValidWriteIds":"0.001",
+  "org.apache.hadoop.hive.metastore.TestHiveMetaStoreClientAlterTable.testAlterTableWithoutHookLoader":"1.093",
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsPartitionKeySeparatorLogic":"0.001",
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithComplexPartitionTypes":"0.053",
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithEmptyPartitionKeyName":"0",
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithMultiplePartitionKeys":"0",
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithNoPartitionKeys":"0.001",
+  "org.apache.hadoop.hive.metastore.utils.TestMetaStoreUtilsGetSchemaWithoutCols.testGetSchemaWithoutColsWithSinglePartitionKey":"0"
+}
