@@ -39,13 +39,17 @@ class DataPrep:
                 with open(f"{self.rawDataInitialPath}jacoco-{self.testTool}-xml/" + str(clas) + "/" + str(method) + "/jacoco.xml",
                           "r") as f:
                     data = f.read()
-                    # ind = method.find("#")
-                    # if ind != -1:
-                    #     method = method[0:ind] + "[" + method[ind + 1:] + "]"
-                    #     method = method.replace("-", "=")
-                    #     method = method.replace("#", ", ")
-                    fulllMethodName = clas + "." + method
-                    coverage_data[fulllMethodName] = data
+                    if self.testTool == "junit":
+                        ind = method.find("#")
+                        if ind != -1:
+                            method = method[0:ind] + "[" + method[ind + 1:] + "]"
+                            method = method.replace("-", "=")
+                            method = method.replace("#", ", ")
+                        fulllMethodName = clas + "." + method
+                        coverage_data[fulllMethodName] = data
+                    else:
+                        fulllMethodName = clas + "." + method
+                        coverage_data[fulllMethodName] = data
 
         for testMethodData in coverage_data:
             bs_data = BeautifulSoup(coverage_data[testMethodData], "xml")
@@ -94,8 +98,9 @@ class DataPrep:
             className = bs_data.find("testsuite").get("name")
             tests = bs_data.findAll("testcase")
             for test in tests:
-                testFullName = className + "." + test.get("name")
-                time_matrix[testFullName] = test.get("time")
+                if not test.findAll("skipped"):
+                    testFullName = className + "." + test.get("name")
+                    time_matrix[testFullName] = test.get("time")
 
         time_matrix_sorted = dict(sorted(time_matrix.items()))
 
@@ -326,48 +331,49 @@ def main():
         "hive-iceberg-handler": [ "org.apache.iceberg.mr.hive.HiveIcebergMetaHook{271;}",
                                   "org.apache.iceberg.mr.hive.HiveIcebergMetaHook{504;}",
                                   "org.apache.iceberg.mr.hive.HiveIcebergMetaHook{505;}" ],
-        "hive-standalone-metastore-common": [ "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{802;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{803;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{804;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{805;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{806;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{807;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{808;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{809;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{810;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{811;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{812;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{813;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{814;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{815;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{816;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{817;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{818;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{819;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{820;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{821;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{822;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{823;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{824;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{825;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{826;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{565;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{566;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{567;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{568;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{569;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{570;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{571;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{572;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{573;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{574;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{575;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{576;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{577;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{578;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{579;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{580;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{581;}", ],
+        "hive-standalone-metastore-common": [ "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{565;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{566;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{567;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{568;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{569;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{570;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{571;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{572;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{573;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{574;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{575;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{576;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{577;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{578;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{579;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{580;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{581;}",
+                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{582;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{802;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{803;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{804;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{805;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{806;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{807;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{808;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{809;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{810;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{811;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{812;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{813;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{814;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{815;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{816;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{817;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{818;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{819;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{820;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{821;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{822;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{823;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{824;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}",
+                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}" ],
         "avro": [ "org.apache.avro.data.RecordBuilderBase{72;}",
                   "org.apache.avro.data.RecordBuilderBase{73;}",
                   "org.apache.avro.data.RecordBuilderBase{74;}",
@@ -406,8 +412,8 @@ def main():
         arg = sys.argv[1]
         if arg:
             dataprep = DataPrep()
-            dataprep.programs = ["avro_pre-fix", "avro_post-fix", "avro_pre-fix_post-gen", "avro_post-fix_post-gen",]
-            dataprep.programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ6_pre-fix", "MavenProjectJ7_pre-fix"]
+            dataprep.programs = ["avro_pre-fix", "avro_post-fix",
+                                 "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
             for program in dataprep.programs:
                 print(program[0:program.find("_")])
                 dataprep.testTool = arg
@@ -439,9 +445,9 @@ def main():
                 # # extra methods for insight
                 dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
             # method that merge all the json files program per program, for Select-QAOA and Add-Greedy
-            dataprep.merge()
+            # dataprep.merge()
     except IndexError:
-        print("No arguments provided")
+        print("Please provide a valid test tool name as an argument: junit or jmh")
         exit(1)
 
 if __name__ == "__main__":
