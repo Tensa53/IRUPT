@@ -169,5 +169,19 @@ To execute this algorithm run these command inside the folder:
 This phase can be automated by the **run_algorithms.sh** script located in the **scripts/** folder, that also automates
 the data processing phase.
 
-### 4. Obtained Results
-TO-DO
+### 4. Statistical Analysis
+All the previous phases are applied on two real systems. These systems have known performance issues and the goal is
+to apply test case selection and see if the selected tests can detect the issue and then the fix. The systems are analyzed
+on two states doing a checkout on some precise commits:
+- **Pre-fix** commit: At this commit, the performance issue is still present in the system; 
+- **Post-fix** commit: At this commit, the performance has just been fixed;
+
+The chosen software are from the Apache Software Foundation:
+- **Avro**: the **avro** module is analyzed;
+- **Hive**: the **standalone-metastore-common** module is analyzed;
+
+The collected data are statistically compared after executing the algorithms in two different ways:
+- **"A monte" execution**: The algorithms are executed on the junit data, to obtain a subset of unit tests and then
+converted to micro benchmarks with ju2jmh;
+- **"A valle" execution**: The micro-benchmarks are directly generated from source code with LLMs. The algorithms are
+executed on the jmh data, to obtain a subset of micro-benchmarks.
