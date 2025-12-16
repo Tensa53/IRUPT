@@ -28,6 +28,100 @@ class DataPrep:
                     text_file.write("  " + json_pair + "\n")
             text_file.write("}")
 
+    def create_method_level_coverage_matrix(self):
+        def parse_method_descriptor(desc):
+            """
+            Converts JVM method descriptor into a list of Java-like parameter types.
+            Example: (Ljava/lang/String;I)V -> ['String', 'int']
+            """
+            params = []
+            i = 1  # skip '('
+            while desc[i] != ')':
+                array_dim = 0
+                while desc[i] == '[':
+                    array_dim += 1
+                    i += 1
+
+                c = desc[i]
+
+                if c == 'L':  # reference type
+                    j = desc.find(';', i)
+                    type_name = desc[i + 1:j].split('/')[-1]
+                    i = j + 1
+                else:  # primitive
+                    primitive_map = {
+                        'Z': 'boolean',
+                        'B': 'byte',
+                        'C': 'char',
+                        'S': 'short',
+                        'I': 'int',
+                        'J': 'long',
+                        'F': 'float',
+                        'D': 'double'
+                    }
+                    type_name = primitive_map[c]
+                    i += 1
+
+                type_name += '[]' * array_dim
+                params.append(type_name)
+
+            return params
+
+        classes = os.listdir(f"{self.rawDataInitialPath}jacoco-{self.testTool}-xml/")
+        coverage_data = dict()
+        coverage_matrix = dict()
+
+        # 1) Load jacoco.xml (one per test / benchmark)
+        for clas in classes:
+            methods = os.listdir(f"{self.rawDataInitialPath}jacoco-{self.testTool}-xml/" + str(clas))
+            for method in methods:
+                jacoco_xml = (
+                    f"{self.rawDataInitialPath}jacoco-{self.testTool}-xml/"
+                    f"{clas}/{method}/jacoco.xml"
+                )
+
+                with open(jacoco_xml, "r") as f:
+                    data = f.read()
+
+                    if self.testTool == "junit":
+                        ind = method.find("#")
+                        if ind != -1:
+                            method = method[0:ind] + "[" + method[ind + 1:] + "]"
+                            method = method.replace("-", "=")
+                            method = method.replace("#", ", ")
+
+                    fullTestMethodName = clas + "." + method
+                    coverage_data[fullTestMethodName] = data
+
+        # 2) Parse jacoco.xml and extract METHOD-LEVEL coverage with signature
+        for testMethodData in coverage_data:
+            bs_data = BeautifulSoup(coverage_data[testMethodData], "xml")
+            covered_methods = set()
+
+            for clas in bs_data.findAll("class"):
+                class_name = clas.get("name").replace("/", ".")
+
+                for method in clas.findAll("method"):
+                    method_name = method.get("name")
+                    desc = method.get("desc")
+
+                    for counter in method.findAll("counter"):
+                        if counter.get("type") == "LINE" and int(counter.get("covered")) > 0:
+                            param_types = parse_method_descriptor(desc)
+                            signature = method_name + "(" + ",".join(param_types) + ")"
+                            full_method_name = class_name + "." + signature
+                            covered_methods.add(full_method_name)
+                            break
+
+            coverage_matrix[testMethodData] = sorted(list(covered_methods))
+
+        coverage_matrix_sorted = dict(sorted(coverage_matrix.items()))
+
+        self.pretty_line_print(
+            f"{self.processedDataInitialPath}coverage_matrix.json",
+            coverage_matrix_sorted
+        )
+
     def create_coverage_matrix(self):
         classes = os.listdir(f"{self.rawDataInitialPath}jacoco-{self.testTool}-xml/")
         coverage_data = dict()

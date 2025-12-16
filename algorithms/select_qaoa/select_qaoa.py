@@ -28,6 +28,7 @@ class SelectQAOA:
     penalties_dictionary = {"MavenProjectJ4": None, "MavenProjectJ5": None, "MavenProjectJ6": None, "MavenProjectJ7": None}
     qubos_dictionary = {"MavenProjectJ4": [], "MavenProjectJ5": [], "MavenProjectJ6": [], "MavenProjectJ7": []}
     alpha = 0.5
+    experiments = 10
     executed_lines_test_by_test = dict()
     test_coverage_line_by_line = dict()
     test_cases_costs = dict()
@@ -306,54 +307,54 @@ class SelectQAOA:
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
-            experiments = 1
 
-            final_selected_tests = []
-            cluster_dict_index = 0
-            for qubo in self.qubos_dictionary[sir_program]:
-                print("QUBO Problem: " + str(qubo) + "\n Cluster Number: " + str(cluster_dict_index))
-                print("Cluster's Test Cases: " + str(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
-                # for each iteration get the result
-                operator, offset = qubo.to_ising()
-                print("Linear QUBO: " + str(qubo))
-                # for each iteration get the result
-                s = time.time()
-                qaoa_result = qaoa.compute_minimum_eigenvalue(operator)
-                e = time.time()
-                # print("QAOA Result: " + str(qaoa_result))
-                qpu_run_times.append((e - s) * 1000)
+            for i in range(self.experiments):
+                final_selected_tests = []
+                cluster_dict_index = 0
+                for qubo in self.qubos_dictionary[sir_program]:
+                    print("QUBO Problem: " + str(qubo) + "\n Cluster Number: " + str(cluster_dict_index))
+                    print("Cluster's Test Cases: " + str(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
+                    # for each iteration get the result
+                    operator, offset = qubo.to_ising()
+                    print("Linear QUBO: " + str(qubo))
+                    # for each iteration get the result
+                    s = time.time()
+                    qaoa_result = qaoa.compute_minimum_eigenvalue(operator)
+                    e = time.time()
+                    # print("QAOA Result: " + str(qaoa_result))
+                    qpu_run_times.append((e - s) * 1000)
 
-                eigenstate = qaoa_result.eigenstate
-                most_likely = max(eigenstate.items(), key=lambda x: x[1])[0]
+                    eigenstate = qaoa_result.eigenstate
+                    most_likely = max(eigenstate.items(), key=lambda x: x[1])[0]
 
-                # Convert to bitstring format
-                if isinstance(most_likely, int):
-                    n = qubo.get_num_binary_vars()
-                    bitstring = [int(b) for b in format(most_likely, f'0{n}b')[::-1]]
-                elif isinstance(most_likely, str):
-                    bitstring = [int(b) for b in most_likely[::-1]]
-                else:
-                    raise ValueError(f"Unsupported eigenstate key type: {type(most_likely)}")
+                    # Convert to bitstring format
+                    if isinstance(most_likely, int):
+                        n = qubo.get_num_binary_vars()
+                        bitstring = [int(b) for b in format(most_likely, f'0{n}b')[::-1]]
+                    elif isinstance(most_likely, str):
+                        bitstring = [int(b) for b in most_likely[::-1]]
+                    else:
+                        raise ValueError(f"Unsupported eigenstate key type: {type(most_likely)}")
 
-                indexes_selected_tests = [index for index, value in enumerate(bitstring) if value == 1]
-                print("Indexes of selected tests to convert. " + str(indexes_selected_tests))
-                selected_tests = []
-                for index in indexes_selected_tests:
-                    selected_tests.append(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index][index])
-                print("Selected tests: " + str(selected_tests))
-                print("Experiment Number: " + str(experiments))
-                cluster_dict_index += 1
-                for selected_test in selected_tests:
-                    if selected_test not in final_selected_tests:
-                        final_selected_tests.append(selected_test)
-
+                    indexes_selected_tests = [index for index, value in enumerate(bitstring) if value == 1]
+                    print("Indexes of selected tests to convert. " + str(indexes_selected_tests))
+                    selected_tests = []
+                    for index in indexes_selected_tests:
+                        selected_tests.append(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index][index])
+                    print("Selected tests: " + str(selected_tests))
+                    print("Experiment Number: " + str(self.experiments))
+                    cluster_dict_index += 1
+                    for selected_test in selected_tests:
+                        if selected_test not in final_selected_tests:
+                            final_selected_tests.append(selected_test)
+                i+=1
                 # now we have to build the pareto front
                 print("Final Selected Test Cases: " + str(final_selected_tests))
                 print("Length of the final list of selected test cases: " + str(len(final_selected_tests)))
                 start = time.time()
                 pareto_front = self.build_pareto_front(sir_program, final_selected_tests)
                 end = time.time()
-                json_data["pareto_front_" + str(experiments)] = pareto_front
+                json_data["pareto_front_" + str(self.experiments)] = pareto_front
                 pareto_front_building_time = (end - start) * 1000
                 pareto_fronts_building_times.append(pareto_front_building_time)
 
@@ -382,8 +383,7 @@ class SelectQAOA:
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
-            experiments = 10
-            for i in range(experiments):
+            for i in range(self.experiments):
                 final_selected_tests = []
                 cluster_dict_index = 0
                 for qubo in self.qubos_dictionary[sir_program]:
