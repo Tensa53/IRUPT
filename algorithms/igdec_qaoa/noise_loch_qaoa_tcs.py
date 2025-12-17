@@ -252,7 +252,7 @@ if __name__ == '__main__':
         itr_num = 0 #number of iterations
 
 
-        while count < 10:
+        while count < num_experiment:
             df_time = 0 # time for writing experiment results in dataframe, to delete in total running time
             qaoa_time_total = 0 #total running time
             exe_count = 0 #number of sub-problems in one iteration

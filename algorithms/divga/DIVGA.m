@@ -1,15 +1,23 @@
-% Program configuration
-programs = {'MavenProjectJ4', 'MavenProjectJ5', 'MavenProjectJ6', 'MavenProjectJ7'};
+% Program configuration (junit tests)
+%programs = {'MavenProjectJ4junitpre', 'MavenProjectJ4junitpost', 'MavenProjectJ5junitpre', 'MavenProjectJ5junitpost'};
+% Program configuration (jmh benchs)
+programs = {'MavenProjectJ4jmhpre', 'MavenProjectJ4jmhpost', 'MavenProjectJ5jmhpre', 'MavenProjectJ5jmhpost'};
 % DIV-GA parameters: 
 % N: starting number of all the elements
 % M: size of the output population
 % coverage_norm: the number of covered lines
 % max_iterations: the number of iterations for the three subroutines 
 % (e.g. if I want 1000 total iterations: 1000 = 334 * 3)
-program_config.MavenProjectJ4 = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
-program_config.MavenProjectJ5 = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
-program_config.MavenProjectJ6 = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
-program_config.MavenProjectJ7 = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+% parameters for junit tests
+%program_config.MavenProjectJ4junitpre = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+%program_config.MavenProjectJ4junitpost = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+%program_config.MavenProjectJ5junitpre = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+%program_config.MavenProjectJ5junitpost = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+% parameters for jmh benchs
+program_config.MavenProjectJ4jmhpre = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+program_config.MavenProjectJ4jmhpost = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+program_config.MavenProjectJ5jmhpre = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+program_config.MavenProjectJ5jmhpost = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
 
 %for each program
 %costs is an array of size N
@@ -479,8 +487,11 @@ for prog = programs
     json_data.execution_times = execution_times
     json_data.DIVGA_mean_execution_time_ms = mean_execution_time;
     json_data.std_dev = exec_times_std_dev;
-    
-    json_file = sprintf('../../results/divga/%s_pareto_fronts_divga.json', program);
+
+    % output for junit tests
+    % json_file = sprintf('../../results/divga/junit/%s_pareto_fronts_divga.json', program);
+    % output for jmh benchs
+    json_file = sprintf('../../results/divga/jmh/%s_pareto_fronts_divga.json', program);
     json_str = jsonencode(json_data);
     fid = fopen(json_file, 'w');
     fprintf(fid, '%s', json_str);

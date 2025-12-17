@@ -1,11 +1,21 @@
 import json
+import os
+import sys
 import time
 
 
 class AdditionalGreedy:
-    sir_programs = ["MavenProjectJ4", "MavenProjectJ5", "MavenProjectJ6", "MavenProjectJ7"]
-    sir_programs_tests_number = {"MavenProjectJ4": 52, "MavenProjectJ5": 52, "MavenProjectJ6": 52, "MavenProjectJ7": 52}
-    sir_programs_rep_values = {"MavenProjectJ4": 1, "MavenProjectJ5": 1, "MavenProjectJ6": 1, "MavenProjectJ7": 1}
+
+    test_tool = ""
+    sir_programs_tests_number = {}
+
+    def __init__(self, test_tool, sir_programs_tests_number):
+        self.test_tool = test_tool
+        self.sir_programs_tests_number = sir_programs_tests_number
+
+    sir_programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
+
+    sir_programs_rep_values = {"MavenProjectJ4_pre-fix": 1, "MavenProjectJ4_post-fix": 1, "MavenProjectJ5_pre-fix": 1, "MavenProjectJ5_post-fix": 1}
     executed_lines_test_by_test = dict()
     faults_dictionary = dict()
     test_coverage_line_by_line = dict()
@@ -22,10 +32,10 @@ class AdditionalGreedy:
             return d
 
     def load_files_content(self):
-        with open("../../data/merged/test_coverage_line_by_line_all_programs.json", "r") as file:
+        with open(f"../../data_example/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json", "r") as file:
             # dictionary that, for each sir program, associates at each TEST of that program the LIST of LINES COVERED by it
             self.test_coverage_line_by_line = self.json_keys_to_int(json.load(file))  # {program1:{tc1:[linei,linej,...,linek],tc2:...}
-        with open("../../data/merged/test_cases_costs_all_programs.json", "r") as file:
+        with open(f"../../data_example/merged/{self.test_tool}/test_cases_costs_all_programs.json", "r") as file:
             # dictionary that, for each sir program, associates at each TEST its EXECUTION COST
             self.test_cases_costs = self.json_keys_to_int(json.load(file))  # {program1:{tc1:ex_cost1,tc2:ex_cost2,...,tcn:ex_costn},program2:...}
 
@@ -53,24 +63,18 @@ class AdditionalGreedy:
                     max_cost = max(self.test_cases_costs[sir_program].values())
                     added_coverage = [line for line in self.test_coverage_line_by_line[sir_program][test_case] if line not in c]
                     try:
-                        # FIRST FORMULATION: such as the notebook algorithm, but without weights and faults  ++++
+                        # FITNESS FORMULATION: such as the notebook algorithm, but without weights and faults  ++++
                         # FIRST OPERAND: percentage of added coverage by the current testcase
                         # DIVIDE PER
                         # SECOND OPERAND: percentage of the added execution cost by the current test case
-                        fitness_func[test_case] = ((len(added_coverage) / len(self.test_coverage_line_by_line[sir_program][test_case]))
-                                                   /
-                                                   (self.test_cases_costs[sir_program][test_case] / max_cost))
-                        # SECOND FORMULATION: such as the algorithm 6 from the DIV-GA paper ----
-                        # FIRST OPERAND: added coverage
-                        # DIVIDE PER
-                        # SECOND OPERAND: execution cost of the current test case
-                        #fitness_func[test_case] = (len(added_coverage) / self.test_cases_costs[sir_program][test_case])
-                    except:
-                        pass
+                        op1 = len(added_coverage) / len(self.test_coverage_line_by_line[sir_program][test_case])
+                        op2 = self.test_cases_costs[sir_program][test_case] / max_cost
+                        fitness_val = op1 / op2
+                        fitness_func[test_case] = fitness_val
+                    except Exception as e:
+                        print("Exception: " + str(e) + " op1="+str(op1) +" op2="+str(op2))
             # take the test case that minimizes the function
-            # print(fitness_func)
-            # key = fitness_func.get
-            # print(key)
+            key = fitness_func.get
             best_test_case = min(fitness_func, key=fitness_func.get)
             test_cases_already_selected.append(best_test_case)
             for covered_line in self.test_coverage_line_by_line[sir_program][best_test_case]:
@@ -85,7 +89,9 @@ class AdditionalGreedy:
     def run_algo(self):
         for sir_program in self.sir_programs:
             print("Executing Additional Greedy Algorithm for: " + sir_program)
-            with open(f"../../results/add-greedy/{sir_program}_data.json", "w") as file:
+            if not os.path.exists(f"../../results/add-greedy/{self.test_tool}/"):
+                os.makedirs(f"../../results/add-greedy/{self.test_tool}/")
+            with open(f"../../results/add-greedy/{self.test_tool}/{sir_program}_data.json", "w") as file:
                 json_data = {}
                 start = time.time()
                 json_data["pareto_front"] = self.additional_greedy(sir_program)
@@ -95,7 +101,14 @@ class AdditionalGreedy:
 
 
 def main():
-    additionalgreedy = AdditionalGreedy()
+    testTool = sys.argv[1]
+    if testTool == "junit":
+        # junit tests
+        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 30, "MavenProjectJ4_post-fix": 30, "MavenProjectJ5_pre-fix": 30, "MavenProjectJ5_post-fix": 30}
+    elif testTool == "jmh":
+        # jmh benchs
+        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
+    additionalgreedy = AdditionalGreedy(testTool, sir_programs_tests_number)
     additionalgreedy.load_files_content()
     additionalgreedy.run_algo()
 

@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import time
 import matplotlib.pyplot as plt
@@ -22,11 +23,17 @@ warnings.filterwarnings("ignore", category=MatplotlibDeprecationWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 class SelectQAOA:
-    sir_programs = ["MavenProjectJ4","MavenProjectJ5","MavenProjectJ6","MavenProjectJ7"]
-    sir_programs_tests_number = {"MavenProjectJ4": 52, "MavenProjectJ5": 52, "MavenProjectJ6": 52, "MavenProjectJ7": 52}
-    sir_programs_rep_values = {"MavenProjectJ4": 1, "MavenProjectJ5": 1, "MavenProjectJ6": 1, "MavenProjectJ7": 1}
-    penalties_dictionary = {"MavenProjectJ4": None, "MavenProjectJ5": None, "MavenProjectJ6": None, "MavenProjectJ7": None}
-    qubos_dictionary = {"MavenProjectJ4": [], "MavenProjectJ5": [], "MavenProjectJ6": [], "MavenProjectJ7": []}
+    sir_programs_tests_number = {}
+    test_tool = ""
+
+    def __init__(self, test_tool, sir_programs_tests_number):
+        self.test_tool = test_tool
+        self.sir_programs_tests_number = sir_programs_tests_number
+
+    sir_programs = ["MavenProjectJ4_pre-fix","MavenProjectJ4_post-fix","MavenProjectJ5_pre-fix","MavenProjectJ5_post-fix"]
+    sir_programs_rep_values = {"MavenProjectJ4_pre-fix": 1, "MavenProjectJ4_post-fix": 1, "MavenProjectJ5_pre-fix": 1, "MavenProjectJ5_post-fix": 1}
+    penalties_dictionary = {"MavenProjectJ4_pre-fix": None, "MavenProjectJ4_post-fix": None, "MavenProjectJ5_pre-fix": None, "MavenProjectJ5_post-fix": None}
+    qubos_dictionary = {"MavenProjectJ4_pre-fix": [], "MavenProjectJ4_post-fix": [], "MavenProjectJ5_pre-fix": [], "MavenProjectJ5_post-fix": []}
     alpha = 0.5
     executed_lines_test_by_test = dict()
     test_coverage_line_by_line = dict()
@@ -44,10 +51,10 @@ class SelectQAOA:
             return d
 
     def load_file_contents(self):
-        executed_lines_test_by_test_json_filepath = "../../data/merged/executed_lines_test_by_test_all_programs.json"
-        test_coverage_line_by_line_json_filepath = "../../data/merged/test_coverage_line_by_line_all_programs.json"
-        test_cases_cost_json_filepath= "../../data/merged/test_cases_costs_all_programs.json"
-        total_program_lines_json_filepath = "../../data/merged/total_program_lines_all_programs.json"
+        executed_lines_test_by_test_json_filepath = f"../../data_example/merged/{self.test_tool}/executed_lines_test_by_test_all_programs.json"
+        test_coverage_line_by_line_json_filepath = f"../../data_example/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
+        test_cases_cost_json_filepath= f"../../data_example/merged/{self.test_tool}/test_cases_costs_all_programs.json"
+        total_program_lines_json_filepath = f"../../data_example/merged/{self.test_tool}/total_program_lines_all_programs.json"
 
         with open(executed_lines_test_by_test_json_filepath, "r") as file:
             # dictionary that, for each sir program, associates at each LINE of that program the LIST of TESTS COVERING it
@@ -302,50 +309,54 @@ class SelectQAOA:
             qaoa = QAOA(sampler=sampling_noise_sampler, optimizer=COBYLA(500),reps=self.sir_programs_rep_values[sir_program])
             # the fronts will be saved into files
             print("Executing Ideal Simulator for Program: " + sir_program)
-            file_path = "../../results/selectqaoa/ideal/" + sir_program + "-data.json"
+            dir_path = f"../../results/selectqaoa/ideal/{self.test_tool}"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            file_path = "../../results/selectqaoa/ideal/" + self.test_tool + "/" + sir_program + "-data.json"
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
-            experiments = 1
+            experiments = 10
 
-            final_selected_tests = []
-            cluster_dict_index = 0
-            for qubo in self.qubos_dictionary[sir_program]:
-                print("QUBO Problem: " + str(qubo) + "\n Cluster Number: " + str(cluster_dict_index))
-                print("Cluster's Test Cases: " + str(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
-                # for each iteration get the result
-                operator, offset = qubo.to_ising()
-                print("Linear QUBO: " + str(qubo))
-                # for each iteration get the result
-                s = time.time()
-                qaoa_result = qaoa.compute_minimum_eigenvalue(operator)
-                e = time.time()
-                # print("QAOA Result: " + str(qaoa_result))
-                qpu_run_times.append((e - s) * 1000)
+            for i in range (experiments):
+                final_selected_tests = []
+                cluster_dict_index = 0
+                for qubo in self.qubos_dictionary[sir_program]:
+                    print("QUBO Problem: " + str(qubo) + "\n Cluster Number: " + str(cluster_dict_index))
+                    print("Cluster's Test Cases: " + str(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
+                    # for each iteration get the result
+                    operator, offset = qubo.to_ising()
+                    print("Linear QUBO: " + str(qubo))
+                    # for each iteration get the result
+                    s = time.time()
+                    qaoa_result = qaoa.compute_minimum_eigenvalue(operator)
+                    e = time.time()
+                    # print("QAOA Result: " + str(qaoa_result))
+                    qpu_run_times.append((e - s) * 1000)
 
-                eigenstate = qaoa_result.eigenstate
-                most_likely = max(eigenstate.items(), key=lambda x: x[1])[0]
+                    eigenstate = qaoa_result.eigenstate
+                    most_likely = max(eigenstate.items(), key=lambda x: x[1])[0]
 
-                # Convert to bitstring format
-                if isinstance(most_likely, int):
-                    n = qubo.get_num_binary_vars()
-                    bitstring = [int(b) for b in format(most_likely, f'0{n}b')[::-1]]
-                elif isinstance(most_likely, str):
-                    bitstring = [int(b) for b in most_likely[::-1]]
-                else:
-                    raise ValueError(f"Unsupported eigenstate key type: {type(most_likely)}")
+                    # Convert to bitstring format
+                    if isinstance(most_likely, int):
+                        n = qubo.get_num_binary_vars()
+                        bitstring = [int(b) for b in format(most_likely, f'0{n}b')[::-1]]
+                    elif isinstance(most_likely, str):
+                        bitstring = [int(b) for b in most_likely[::-1]]
+                    else:
+                        raise ValueError(f"Unsupported eigenstate key type: {type(most_likely)}")
 
-                indexes_selected_tests = [index for index, value in enumerate(bitstring) if value == 1]
-                print("Indexes of selected tests to convert. " + str(indexes_selected_tests))
-                selected_tests = []
-                for index in indexes_selected_tests:
-                    selected_tests.append(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index][index])
-                print("Selected tests: " + str(selected_tests))
-                print("Experiment Number: " + str(experiments))
-                cluster_dict_index += 1
-                for selected_test in selected_tests:
-                    if selected_test not in final_selected_tests:
-                        final_selected_tests.append(selected_test)
+                    indexes_selected_tests = [index for index, value in enumerate(bitstring) if value == 1]
+                    print("Indexes of selected tests to convert. " + str(indexes_selected_tests))
+                    selected_tests = []
+                    for index in indexes_selected_tests:
+                        selected_tests.append(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index][index])
+                    print("Selected tests: " + str(selected_tests))
+                    print("Experiment Number: " + str(i))
+                    cluster_dict_index += 1
+                    for selected_test in selected_tests:
+                        if selected_test not in final_selected_tests:
+                            final_selected_tests.append(selected_test)
 
                 # now we have to build the pareto front
                 print("Final Selected Test Cases: " + str(final_selected_tests))
@@ -353,7 +364,7 @@ class SelectQAOA:
                 start = time.time()
                 pareto_front = self.build_pareto_front(sir_program, final_selected_tests)
                 end = time.time()
-                json_data["pareto_front_" + str(experiments)] = pareto_front
+                json_data["pareto_front_" + str(i)] = pareto_front
                 pareto_front_building_time = (end - start) * 1000
                 pareto_fronts_building_times.append(pareto_front_building_time)
 
@@ -378,19 +389,21 @@ class SelectQAOA:
             qaoa = QAOA(sampler=fake_sampler, optimizer=COBYLA(500), reps=self.sir_programs_rep_values[sir_program])
             # the fronts will be saved into files
             print("Executing Noise Simulator for Program: " + str(sir_program))
-            file_path = "../../results/selectqaoa/noise/" + sir_program + "-data.json"
+            dir_path = f"../../results/selectqaoa/noise/{self.test_tool}"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            file_path = "../../results/selectqaoa/noise/" + self.test_tool + "/" + sir_program + "-data.json"
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
-            experiments = 10
+            experiments = 1
             for i in range(experiments):
                 final_selected_tests = []
                 cluster_dict_index = 0
                 for qubo in self.qubos_dictionary[sir_program]:
                     print("Experiment Number: " + str(i))
                     print("QUBO Problem: " + str(qubo) + "\nCluster Number: " + str(cluster_dict_index))
-                    print("Cluster's Test Cases: " + str(
-                        list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
+                    print("Cluster's Test Cases: " + str(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
                     # for each iteration get the result
                     operator, offset = qubo.to_ising()
                     print("Linear QUBO: " + str(qubo))
@@ -423,7 +436,7 @@ class SelectQAOA:
                     for selected_test in selected_tests:
                         if selected_test not in final_selected_tests:
                             final_selected_tests.append(selected_test)
-                i += 1
+
                 # now we have to build the pareto front
                 print("Final Selected Test Cases: " + str(final_selected_tests))
                 print(len(final_selected_tests))
@@ -447,20 +460,28 @@ class SelectQAOA:
 
 def main():
     mode = sys.argv[1]
-    selectQAOA = SelectQAOA()
+    testTool = sys.argv[2]
+    sir_programs_tests_number = {}
+    if testTool == "junit":
+        # junit tests
+        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 30, "MavenProjectJ4_post-fix": 30, "MavenProjectJ5_pre-fix": 30, "MavenProjectJ5_post-fix": 30}
+    elif testTool == "jmh":
+        # jmh benchs
+        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
+    selectQAOA = SelectQAOA(testTool, sir_programs_tests_number)
     selectQAOA.load_file_contents()
     selectQAOA.process_clusters()
-    # selectQAOA.specify_penalties()
-    # selectQAOA.save_QUBO_in_dict()
-    # if mode == "ideal":
-    #     # run the ideal simulator
-    #     selectQAOA.run_ideal_simulator()
-    # elif mode == "noise":
-    #     # run the noise simulator
-    #     selectQAOA.run_noise_simulator()
-    # else:
-    #     print("Unsupported mode: " + mode + ". Available modes: ideal, noise")
-    #     exit(1)
+    selectQAOA.specify_penalties()
+    selectQAOA.save_QUBO_in_dict()
+    if mode == "ideal":
+        # run the ideal simulator
+        selectQAOA.run_ideal_simulator()
+    elif mode == "noise":
+        # run the noise simulator
+        selectQAOA.run_noise_simulator()
+    else:
+        print("Unsupported mode: " + mode + ". Available modes: ideal, noise")
+        exit(1)
 
 if __name__ == '__main__':
     main()
