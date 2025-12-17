@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -9,19 +10,21 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
-        <!-- Dipendenze Junit4 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
         </dependency>
-        <!-- Dipendenza Jacoco per API -->
         <dependency>
             <groupId>org.jacoco</groupId>
             <artifactId>org.jacoco.core</artifactId>
             <version>0.8.13</version>
         </dependency>
-        <!-- Dipendenze JMH -->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
@@ -46,12 +49,11 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.13</version>
-                <!-- Configurazione plugin per intercettare l'output -->
                 <configuration>
                     <jmx>true</jmx>
                     <excludes>
-                        <exclude>org/example/benchmarks/**</exclude>
                         <exclude>org/example/runners/**</exclude>
+                        <exclude>org/example/benchmarks/**</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -73,9 +75,17 @@
                             <value>org.example.listeners.JaCoCoListener</value>
                         </property>
                     </properties>
+                    <parallel>none</parallel>
+                    <forkCount>1</forkCount>
+                    <reuseForks>true</reuseForks>
+                    <runOrder>filesystem</runOrder>
                 </configuration>
             </plugin>
-            <!-- Plugin per JMH -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -96,7 +106,6 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <!-- Plugin Maven Shade per creare un JAR eseguibile -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

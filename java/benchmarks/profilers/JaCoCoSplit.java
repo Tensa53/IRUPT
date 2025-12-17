@@ -9,7 +9,6 @@ import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.lang.management.ManagementFactory;
 
@@ -17,12 +16,14 @@ public class JaCoCoSplit {
 
     private static final String JACOCO_MBEAN_NAME = "org.jacoco:type=Runtime";
 
-    public static void writeExecutionData(String testMethodName, String testClassName, String targetSubDir) {
+    public static synchronized void writeExecutionData(String testMethodName, String testClassName,
+                                                        String targetSubDir) {
         try {
             MBeanServerConnection mbsc = ManagementFactory.getPlatformMBeanServer();
             ObjectName objectName = new ObjectName(JACOCO_MBEAN_NAME);
-            // Invoke the dump command with no reset (you can set to true if you want to reset coverage after each dump)
-            byte[] executionData = (byte[]) mbsc.invoke(objectName, "getExecutionData", new Object[]{true}, new String[]{"boolean"});
+            // Invoke the dump command with reset (you can set to false to not reset coverage after each dump)
+            byte[] executionData = (byte[]) mbsc.invoke(objectName, "getExecutionData", new Object[] { true },
+                    new String[] { "boolean" });
 
             ExecutionDataStore executionDataStore = new ExecutionDataStore();
             SessionInfoStore sessionInfoStore = new SessionInfoStore();
@@ -35,27 +36,23 @@ public class JaCoCoSplit {
             }
             File methodExecFile = new File(parentExecDir, "jacoco.exec");
 
-            // 1. Load existing data from file (if it exists)
-            if (methodExecFile.exists()) {
-                FileInputStream fis = new FileInputStream(methodExecFile);
-                ExecutionDataReader reader = new ExecutionDataReader(fis);
-                reader.setExecutionDataVisitor(executionDataStore);
-                reader.setSessionInfoVisitor(sessionInfoStore);
-                reader.read();
-            }
-
-            // 2. Load new data from JMX bytes
+            // Load new data from JMX bytes
             ByteArrayInputStream bis = new ByteArrayInputStream(executionData);
             ExecutionDataReader reader = new ExecutionDataReader(bis);
             reader.setExecutionDataVisitor(executionDataStore);
             reader.setSessionInfoVisitor(sessionInfoStore);
             reader.read();
 
-            // 3. Write merged data back to file
-            FileOutputStream fos = new FileOutputStream(methodExecFile);
+            // Write merged data back to file atomically
+            File tempFile = new File(parentExecDir, "jacoco.exec.tmp");
+            FileOutputStream fos = new FileOutputStream(tempFile);
             ExecutionDataWriter writer = new ExecutionDataWriter(fos);
             executionDataStore.accept(writer);
             sessionInfoStore.accept(writer);
+            fos.close();
+
+            // Atomic rename to prevent partial reads
+            tempFile.renameTo(methodExecFile);
         } catch (Exception e) {
             e.printStackTrace();
         }

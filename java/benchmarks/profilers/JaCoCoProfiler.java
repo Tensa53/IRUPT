@@ -10,7 +10,6 @@ import org.openjdk.jmh.runner.IterationType;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.example.benchmarks.profilers.JaCoCoCoverageMatrix.updateCoverageMatrix;
 import static org.example.benchmarks.profilers.JaCoCoSplit.writeExecutionData;
 
 public class JaCoCoProfiler implements InternalProfiler {
