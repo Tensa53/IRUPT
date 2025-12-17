@@ -101,7 +101,7 @@ class DataPrep:
                 if not test.findAll("skipped"):
                     testFullName = className + "." + test.get("name")
                     time = test.get("time")
-                    if time == "0.0":
+                    if time == "0" or time == "0.0" or time == "0.00" or time == "0.000":
                         time = "3600.0"
                     time_matrix[testFullName] = time
 
@@ -473,7 +473,7 @@ def main():
                 dataprep.mergedDataInitialPath= f"merged/{dataprep.testTool}/"
                 # # methods that create coverage and time matrix from jacoco, junit, jmh reports
                 # dataprep.create_coverage_matrix()
-                # dataprep.create_time_matrix()
+                dataprep.create_time_matrix()
                 # # # methods that create input json files for Add-Greedy and first two files for Select-QAOA
                 # dataprep.coverage_matrix_reverse()
                 # # methods that create remaining input json files for Select-QAOA
@@ -483,12 +483,12 @@ def main():
                 # dataprep.map_coverage_matrix_element_entries_to_classline_number()
                 # dataprep.map_coverage_matrix_reverse_keys_to_classline_number()
                 # dataprep.map_coverage_matrix_reverse_element_entries_to_testcase_number()
-                # dataprep.map_time_matrix_keys_to_testcase_number()
+                dataprep.map_time_matrix_keys_to_testcase_number()
                 # # methods that create input text files for DIV-GA
                 # dataprep.plain_from_coverage_matrix()
-                # dataprep.plain_from_time_matrix()
+                dataprep.plain_from_time_matrix()
                 # # methods that create input csv file for IGDec-QAOA
-                # dataprep.csv_from_coverage_matrix_and_time_matrix()
+                dataprep.csv_from_coverage_matrix_and_time_matrix()
                 # # # extra methods for insight
                 # dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
                 # dataprep.filter_testcases_with_no_coverage()
