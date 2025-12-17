@@ -40,7 +40,7 @@ JAR_PATH="target/MavenProjectJ4-1.0-SNAPSHOT.jar"
 # JMH arguments
 COMMON_ARGS="-f 10 -i 3000 -wi 0 -bm ss -tu ms"
 # Path to save json output
-REPORT_PATH="time-reports"
+REPORT_PATH="target/time-reports"
 # Normal user to change ownership of output files
 NORMAL_USER="daniele"
 
