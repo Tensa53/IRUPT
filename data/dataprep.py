@@ -100,7 +100,16 @@ class DataPrep:
             for test in tests:
                 if not test.findAll("skipped"):
                     testFullName = className + "." + test.get("name")
-                    time_matrix[testFullName] = test.get("time")
+                    time = test.get("time")
+                    if time == "0.0":
+                        time = "3600.0"
+                    time_matrix[testFullName] = time
+
+        min_time = min(time_matrix.values())
+
+        for testFullName in time_matrix:
+            if time_matrix[testFullName] == "3600.0":
+                time_matrix[testFullName] = min_time
 
         time_matrix_sorted = dict(sorted(time_matrix.items()))
 
@@ -116,12 +125,12 @@ class DataPrep:
         for clas in classes:
             try:
                 reports = os.listdir(baseDir+clas)
-                # print(reports)
             except NotADirectoryError:
                 print("Not a directory")
                 continue
             for report in reports:
-                files = json.load(open(f"{baseDir}{clas}/{report}", "r"))
+                path = f"{baseDir}{clas}/{report}"
+                files = json.load(open(path, "r"))
                 if len(files) == 1:
                     file = files[0]
                     benchmark = file.get("benchmark")
@@ -133,12 +142,12 @@ class DataPrep:
                         params = file.get("params")
                         score = str(file.get("primaryMetric")["score"])
                         parameters = "#"
-                        # print("Benchamrk:" + benchmark + "Parameters:")
-                        # print(params)
-                        for param in params:
-                            parameters += param + "=" + params[param] + "_"
-                        benchmarkFull = benchmark+parameters[:-1]
-                        # print(benchmarkFull)
+                        if params:
+                            for param in params:
+                                parameters += param + "=" + params[param] + "_"
+                            benchmarkFull = benchmark+parameters[:-1]
+                        else:
+                            benchmarkFull = benchmark
                         time_matrix[benchmarkFull] = score
 
         time_matrix_sorted = dict(sorted(time_matrix.items()))
@@ -191,7 +200,7 @@ class DataPrep:
 
         lines_dict = dict()
 
-        i = 0
+        i = 1
         for line in lines_set_ordered:
             lines_dict[line] = i
             i += 1
@@ -208,7 +217,51 @@ class DataPrep:
             number = testcase_to_number[test]
             coverage_matrix_numbers[number] = coverage_matrix[test]
 
-        self.pretty_line_print(f"{self.processedDataInitialPath}test_coverage_line_by_line.json", coverage_matrix_numbers)
+        self.pretty_line_print(f"{self.processedDataInitialPath}test_coverage_line_by_line_str.json", coverage_matrix_numbers)
+
+    def map_coverage_matrix_element_entries_to_classline_number(self):
+        coverage_matrix = json.load(open(f"{self.processedDataInitialPath}test_coverage_line_by_line_str.json"))
+        classline_to_number = json.load(open(f"{self.processedDataInitialPath}classlines_number.json"))
+
+        coverage_matrix_element_entries = dict()
+
+        for test in coverage_matrix.keys():
+            classlines_entry = coverage_matrix[test]
+            classline_to_number_list = list()
+            for line in classlines_entry:
+                num = classline_to_number[line]
+                classline_to_number_list.append(num)
+            coverage_matrix_element_entries[test] = classline_to_number_list
+
+        self.pretty_line_print(f"{self.processedDataInitialPath}test_coverage_line_by_line.json", coverage_matrix_element_entries)
+
+    def map_coverage_matrix_reverse_keys_to_classline_number(self):
+        coverage_matrix_reverse = json.load(open(f"{self.processedDataInitialPath}coverage_matrix_reversed.json"))
+        classline_to_number = json.load(open(f"{self.processedDataInitialPath}classlines_number.json"))
+
+        coverage_matrix_reverse_numbers = dict()
+
+        for line in coverage_matrix_reverse.keys():
+            number = classline_to_number[line]
+            coverage_matrix_reverse_numbers[number] = coverage_matrix_reverse[line]
+
+        self.pretty_line_print(f"{self.processedDataInitialPath}executed_lines_test_by_test_str.json", coverage_matrix_reverse_numbers)
+
+    def map_coverage_matrix_reverse_element_entries_to_testcase_number(self):
+        coverage_matrix_reverse = json.load(open(f"{self.processedDataInitialPath}executed_lines_test_by_test_str.json"))
+        testcase_to_number = json.load(open(f"{self.processedDataInitialPath}testcases_number.json"))
+
+        coverage_matrix_element_entries = dict()
+
+        for line in coverage_matrix_reverse.keys():
+            test_entry = coverage_matrix_reverse[line]
+            test_to_number_list = list()
+            for test in test_entry:
+                num = testcase_to_number[test]
+                test_to_number_list.append(num)
+            coverage_matrix_element_entries[line] = test_to_number_list
+
+        self.pretty_line_print(f"{self.processedDataInitialPath}executed_lines_test_by_test.json", coverage_matrix_element_entries)
 
     def map_time_matrix_keys_to_testcase_number(self):
         times = json.load(open(f"{self.processedDataInitialPath}time_matrix.json"))
@@ -223,7 +276,7 @@ class DataPrep:
         self.pretty_line_print(f"{self.processedDataInitialPath}test_cases_costs.json", test_times_to_number)
 
     def plain_from_coverage_matrix(self):
-        coverage_matrix = json.load(open(f"{self.processedDataInitialPath}coverage_matrix.json"))
+        coverage_matrix = json.load(open(f"{self.processedDataInitialPath}test_coverage_line_by_line.json"))
 
         with open(f"{self.processedDataInitialPath}{self.program}_coverage.txt", "w") as text_file:
             for coverage_matrix_key in coverage_matrix.keys():
@@ -231,7 +284,7 @@ class DataPrep:
 
                 lineString = ""
                 for coverage_matrix_row_element in coverage_matrix_row:
-                    lineString += coverage_matrix_row_element + ","
+                    lineString += str(coverage_matrix_row_element) + ","
                 lineString = lineString[:-1]
                 text_file.write(lineString + "\n")
 
@@ -276,7 +329,9 @@ class DataPrep:
         total_program_lines_all_programs = dict()
 
         for program in self.programs:
-            executed_lines_test_by_test = json.load(open(f"{self.processedDataInitialPath}coverage_matrix.json"))
+            self.rawDataInitialPath = f"raw/{program}/{self.testTool}/"
+            self.processedDataInitialPath = f"processed/{program}/{self.testTool}/"
+            executed_lines_test_by_test = json.load(open(f"{self.processedDataInitialPath}executed_lines_test_by_test.json"))
             test_coverage_line_by_line = json.load(open(f"{self.processedDataInitialPath}test_coverage_line_by_line.json"))
             test_cases_costs = json.load(open(f"{self.processedDataInitialPath}test_cases_costs.json"))
             total_program_lines = json.load(open(f"{self.rawDataInitialPath}total_lines.json"))
@@ -285,10 +340,10 @@ class DataPrep:
             test_cases_costs_all_programs[program] = test_cases_costs.copy()
             total_program_lines_all_programs[program] = total_program_lines["Java"]["code"]
 
-        json.dump(executed_lines_test_by_test_all_programs, open(f"{self.mergedDataInitialPath}executed_lines_test_by_test_all_programs.json", "w"))
-        json.dump(test_coverage_line_by_line_all_programs, open(f"{self.mergedDataInitialPath}test_coverage_line_by_line_all_programs.json", "w"))
-        json.dump(test_cases_costs_all_programs, open(f"{self.mergedDataInitialPath}test_cases_costs_all_programs.json", "w"))
-        json.dump(total_program_lines_all_programs, open(f"{self.mergedDataInitialPath}total_program_lines_all_programs.json", "w"))
+        self.pretty_line_print(f"{self.mergedDataInitialPath}executed_lines_test_by_test_all_programs.json", executed_lines_test_by_test_all_programs)
+        self.pretty_line_print(f"{self.mergedDataInitialPath}test_coverage_line_by_line_all_programs.json", test_coverage_line_by_line_all_programs)
+        self.pretty_line_print(f"{self.mergedDataInitialPath}test_cases_costs_all_programs.json", test_cases_costs_all_programs)
+        self.pretty_line_print(f"{self.mergedDataInitialPath}total_program_lines_all_programs.json", total_program_lines_all_programs)
 
     def search_covered_method_lines(self, method_lines_to_search):
         executed_lines_test_by_test = json.load(open(f"{self.processedDataInitialPath}coverage_matrix_reversed.json"))
@@ -305,32 +360,26 @@ class DataPrep:
 
         self.pretty_line_print(f"{self.processedDataInitialPath}executed_lines_test_by_test_filtered.json", executed_lines_test_by_test_filtered)
 
+    def filter_testcases_with_no_coverage(self):
+        coverage_matrix = json.load(open(f"{self.processedDataInitialPath}coverage_matrix.json"))
+
+        testcases_with_no_coverage = dict()
+
+        for testcaseName in coverage_matrix:
+            covered_lines = coverage_matrix[testcaseName]
+
+            if len(covered_lines) == 0:
+                testcases_with_no_coverage[testcaseName] = list()
+                testcases_with_no_coverage[testcaseName].append("no coverage")
+
+        if len(testcases_with_no_coverage) == 0:
+            testcases_with_no_coverage["all_tests"] = list()
+            testcases_with_no_coverage["all_tests"].append("with coverage")
+
+        self.pretty_line_print(f"{self.processedDataInitialPath}testcases_with_no_coverage.json", testcases_with_no_coverage)
+
 def main():
     method_lines_to_search_dict = {
-        "ignite": [ "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.calculateFragmentSizes(int,long,long){631;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.calculateFragmentSizes(int,long,long){645;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){659;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){660;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){661;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){662;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){663;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){664;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){665;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){666;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){667;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){668;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){669;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){670;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){671;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){672;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){673;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){674;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){675;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){676;}",
-                    "org.apache.ignite.internal.processors.cache.persistence.GridCacheDatabaseSharedManager.createPageMemory(){677;}"],
-        "hive-iceberg-handler": [ "org.apache.iceberg.mr.hive.HiveIcebergMetaHook{271;}",
-                                  "org.apache.iceberg.mr.hive.HiveIcebergMetaHook{504;}",
-                                  "org.apache.iceberg.mr.hive.HiveIcebergMetaHook{505;}" ],
         "hive-standalone-metastore-common": [ "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{565;}",
                                               "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{566;}",
                                               "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{567;}",
@@ -374,18 +423,13 @@ def main():
                                               "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{824;}",
                                               "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}",
                                               "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}" ],
-        "avro": [ "org.apache.avro.data.RecordBuilderBase{72;}",
-                  "org.apache.avro.data.RecordBuilderBase{73;}",
-                  "org.apache.avro.data.RecordBuilderBase{74;}",
-                  "org.apache.avro.data.RecordBuilderBase{75;}",
-                  "org.apache.avro.data.RecordBuilderBase{76;}",
+        "avro": [ "org.apache.avro.data.RecordBuilderBase{76;}",
                   "org.apache.avro.data.RecordBuilderBase{77;}",
-                  "org.apache.avro.data.RecordBuilderBase{78;}",
                   "org.apache.avro.util.Utf8{64;}",
                   "org.apache.avro.util.Utf8{65;}",
-                  "org.apache.avro.util.Utf8{115;}",
-                  "org.apache.avro.util.Utf8{115;}",
-                  "org.apache.avro.util.Utf8{116;}" ],
+                  "org.apache.avro.util.Utf8{116;}",
+                  "org.apache.avro.util.Utf8{117;}",
+                  "org.apache.avro.util.Utf8{118;}",],
         "MavenProjectJ4": [ "org.example.utente.Utente{50;}",
                             "org.example.utente.Utente{51;}",
                             "org.example.utente.Utente{60;}",
@@ -412,11 +456,11 @@ def main():
         arg = sys.argv[1]
         if arg:
             dataprep = DataPrep()
-            dataprep.programs = ["avro_pre-fix", "avro_post-fix",
-                                 "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
+            dataprep.testTool = arg
+            # dataprep.programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
+            dataprep.programs = ["avro_pre-fix", "avro_post-fix", "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
             for program in dataprep.programs:
                 print(program[0:program.find("_")])
-                dataprep.testTool = arg
                 dataprep.program = program
                 print("Processing the data for: " + program)
                 dataprep.program = program
@@ -427,25 +471,29 @@ def main():
                 dataprep.rawDataInitialPath = f"raw/{dataprep.program}/{dataprep.testTool}/"
                 dataprep.processedDataInitialPath = f"processed/{dataprep.program}/{dataprep.testTool}/"
                 dataprep.mergedDataInitialPath= f"merged/{dataprep.testTool}/"
-                # methods that create coverage and time matrix from jacoco, junit, jmh reports
-                dataprep.create_coverage_matrix()
-                dataprep.create_time_matrix()
-                # methods that create input json files for Add-Greedy and first two files for Select-QAOA
-                dataprep.coverage_matrix_reverse()
-                # methods that create remaining input json files for Select-QAOA
-                dataprep.map_testcases_to_number()
-                dataprep.maps_classlines_to_number()
-                dataprep.map_coverage_matrix_keys_to_testcase_number()
-                dataprep.map_time_matrix_keys_to_testcase_number()
-                # methods that create input text files for DIV-GA
-                dataprep.plain_from_coverage_matrix()
-                dataprep.plain_from_time_matrix()
-                # methods that create input csv file for IGDec-QAOA
-                dataprep.csv_from_coverage_matrix_and_time_matrix()
-                # # extra methods for insight
-                dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
+                # # methods that create coverage and time matrix from jacoco, junit, jmh reports
+                # dataprep.create_coverage_matrix()
+                # dataprep.create_time_matrix()
+                # # # methods that create input json files for Add-Greedy and first two files for Select-QAOA
+                # dataprep.coverage_matrix_reverse()
+                # # methods that create remaining input json files for Select-QAOA
+                # dataprep.map_testcases_to_number()
+                # dataprep.maps_classlines_to_number()
+                # dataprep.map_coverage_matrix_keys_to_testcase_number()
+                # dataprep.map_coverage_matrix_element_entries_to_classline_number()
+                # dataprep.map_coverage_matrix_reverse_keys_to_classline_number()
+                # dataprep.map_coverage_matrix_reverse_element_entries_to_testcase_number()
+                # dataprep.map_time_matrix_keys_to_testcase_number()
+                # # methods that create input text files for DIV-GA
+                # dataprep.plain_from_coverage_matrix()
+                # dataprep.plain_from_time_matrix()
+                # # methods that create input csv file for IGDec-QAOA
+                # dataprep.csv_from_coverage_matrix_and_time_matrix()
+                # # # extra methods for insight
+                # dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
+                # dataprep.filter_testcases_with_no_coverage()
             # method that merge all the json files program per program, for Select-QAOA and Add-Greedy
-            # dataprep.merge()
+            dataprep.merge()
     except IndexError:
         print("Please provide a valid test tool name as an argument: junit or jmh")
         exit(1)
