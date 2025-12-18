@@ -278,7 +278,17 @@ class DataPrep:
     def plain_from_coverage_matrix(self):
         coverage_matrix = json.load(open(f"{self.processedDataInitialPath}test_coverage_line_by_line.json"))
 
-        with open(f"{self.processedDataInitialPath}{self.program}_coverage.txt", "w") as text_file:
+        prog_name = self.program[0:self.program.find("_")]
+        if prog_name.count("-") > 0:
+            prog_name = prog_name[0:prog_name.find("-")]
+
+        fix_status = self.program[self.program.find("_p")+1:self.program.rfind("-")]
+
+        file_name = prog_name + self.testTool + fix_status + "_coverage.txt"
+
+        print(file_name)
+
+        with open(f"{self.processedDataInitialPath}{file_name}", "w") as text_file:
             for coverage_matrix_key in coverage_matrix.keys():
                 coverage_matrix_row = coverage_matrix[coverage_matrix_key]
 
@@ -291,7 +301,17 @@ class DataPrep:
     def plain_from_time_matrix(self):
         time_matrix = json.load(open(f"{self.processedDataInitialPath}time_matrix.json"))
 
-        with open(f"{self.processedDataInitialPath}{self.program}_costs.txt", "w") as text_file:
+        prog_name = self.program[0:self.program.find("_")]
+        if prog_name.count("-") > 0:
+            prog_name = prog_name[0:prog_name.find("-")]
+
+        fix_status = self.program[self.program.find("_p")+1:self.program.rfind("-")]
+
+        file_name = prog_name + self.testTool + fix_status + "_cost.txt"
+
+        print(file_name)
+
+        with open(f"{self.processedDataInitialPath}{file_name}", "w") as text_file:
             times = list(time_matrix.values())
             timeString = ""
             for time in times:
@@ -473,7 +493,7 @@ def main():
                 dataprep.mergedDataInitialPath= f"merged/{dataprep.testTool}/"
                 # # methods that create coverage and time matrix from jacoco, junit, jmh reports
                 # dataprep.create_coverage_matrix()
-                dataprep.create_time_matrix()
+                # dataprep.create_time_matrix()
                 # # # methods that create input json files for Add-Greedy and first two files for Select-QAOA
                 # dataprep.coverage_matrix_reverse()
                 # # methods that create remaining input json files for Select-QAOA
@@ -483,9 +503,9 @@ def main():
                 # dataprep.map_coverage_matrix_element_entries_to_classline_number()
                 # dataprep.map_coverage_matrix_reverse_keys_to_classline_number()
                 # dataprep.map_coverage_matrix_reverse_element_entries_to_testcase_number()
-                dataprep.map_time_matrix_keys_to_testcase_number()
+                # dataprep.map_time_matrix_keys_to_testcase_number()
                 # # methods that create input text files for DIV-GA
-                # dataprep.plain_from_coverage_matrix()
+                dataprep.plain_from_coverage_matrix()
                 dataprep.plain_from_time_matrix()
                 # # methods that create input csv file for IGDec-QAOA
                 dataprep.csv_from_coverage_matrix_and_time_matrix()
@@ -493,7 +513,7 @@ def main():
                 # dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
                 # dataprep.filter_testcases_with_no_coverage()
             # method that merge all the json files program per program, for Select-QAOA and Add-Greedy
-            dataprep.merge()
+            # dataprep.merge()
     except IndexError:
         print("Please provide a valid test tool name as an argument: junit or jmh")
         exit(1)
