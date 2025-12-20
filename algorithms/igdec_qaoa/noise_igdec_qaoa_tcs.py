@@ -1,3 +1,5 @@
+import json
+import sys
 import time
 import matplotlib.pyplot as plt
 import random
@@ -192,7 +194,7 @@ def print_result(result, testcase):
 def plot(fval_list, reps, file_name, problem_size):
     plt.plot(fval_list)
     plt.ylabel('fval')
-    plt.savefig("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/fval_trend.png")
+    plt.savefig("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool  + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/fval_trend.png")
 
 def scatter_merge(solution, data):
     time = []
@@ -213,15 +215,68 @@ def get_initial_fval(length):
     return best_solution, best_energy
 
 
+def convert_solution(candidate_solution):
+    converted_solution = []
+
+    for i in range(len(candidate_solution)):
+        if candidate_solution[i] == 1:
+            converted_solution.append(i)
+
+    return converted_solution
+
+
+def convert_pareto(pareto_front_list):
+    converted_pareto_list = []
+    for pareto_front in pareto_front_list:
+        converted_pareto = convert_solution(pareto_front)
+        converted_pareto_list.append(converted_pareto)
+
+    return converted_pareto_list
+
+
+def build_pareto_front(solution):
+    pareto_front_list = []
+    max_fval = 0
+
+    for index in range(1, len(solution) + 1):
+        candidate_solution = solution[:index]
+        candidate_solution_fval = 0
+
+        for candidates in candidate_solution:
+            candidate_solution_fval += print_diet(candidate_solution, df)
+
+        if max_fval >= candidate_solution_fval:
+            continue
+
+        if candidate_solution_fval > max_fval:
+            max_fval = candidate_solution_fval
+
+        if candidate_solution.count(1) > 0:
+            pareto_front_list.append(candidate_solution)
+
+    return pareto_front_list
+
+
+def remove_dup_pareto(converted_pareto):
+    pareto_set = set()
+
+    for solution in converted_pareto:
+        solution_tuple = tuple(solution)
+        pareto_set.add(solution_tuple)
+
+    return list(pareto_set)
 
 if __name__ == '__main__':
+    test_tool = sys.argv[1]
     num_experiment = 10
     reps = 1
     problem_size = 7
-    programs = ["MavenProjectJ4", "MavenProjectJ5", "MavenProjectJ6"]
+    programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
+    # programs = ["avro_pre-fix", "avro_post-fix", "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
     for file_name in programs:
         print("Executing IGDec-QAOA Noise Algorithm for: " + file_name)
-        datasets_path = "../../data/processed/" + file_name + "/" + file_name + ".csv"
+        # datasets_path = "../../data_example/processed/" + file_name + "/" + test_tool + "/" + file_name + ".csv"
+        datasets_path = "../../data/processed/" + file_name + "/" + test_tool + "/" + file_name + ".csv"
         df = pd.read_csv(datasets_path, dtype={"time": float, "rate": float})
         length = len(df)
         best_solution, best_energy = get_initial_fval(length)
@@ -248,6 +303,9 @@ if __name__ == '__main__':
         execution_times = []
         best_itr_times = []
         best_itr_rates = []
+        pareto_fronts = {}
+        converted_pareto_fronts = {}
+        unique_pareto_fronts = {}
 
         itr_num = 0 #number of iterations
 
@@ -328,6 +386,13 @@ if __name__ == '__main__':
                 best_itr = itr_num
                 best_solution = solution
                 best_energy = energy
+
+            # build pareto front
+            pareto_name = "pareto_" + str(count)
+            pareto_fronts[pareto_name] = build_pareto_front(solution)
+            converted_pareto_fronts[pareto_name] = convert_pareto(pareto_fronts[pareto_name])
+            unique_pareto_fronts[pareto_name] = remove_dup_pareto(converted_pareto_fronts[pareto_name])
+
             total_end = time.time()
             total_itr_time = total_end - total_start - df_time + impact_time # total execution time in one iteration
 
@@ -354,16 +419,18 @@ if __name__ == '__main__':
         values_solution = [best_itr, best_energy, best_solution, total_qaoa, total_impact, total_exe, execution_times, best_itr_times, best_itr_rates]
         solution_df.loc[len(solution_df)] = values_solution
 
-        if not os.path.exists("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)):
-            os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment))
-        log_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/log.csv")
+        if not os.path.exists("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)):
+            os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool  + "/size_" + str(problem_size) + "/" + str(num_experiment))
+        log_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/log.csv")
 
-        if not os.path.exists("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)):
-            os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment))
-        result_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/itr_results.csv")
+        if not os.path.exists("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)):
+            os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment))
+        result_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/itr_results.csv")
 
-        if not os.path.exists("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)):
-            os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment))
-        solution_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/solution.csv")
+        if not os.path.exists("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)):
+            os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment))
+        solution_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/solution.csv")
+
+        json.dump(pareto_fronts, open("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/pareto_fronts.json", "w"))
 
         plot(fval_list, reps, file_name, problem_size)
