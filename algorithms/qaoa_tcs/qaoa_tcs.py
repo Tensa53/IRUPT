@@ -30,10 +30,18 @@ class SelectQAOA:
         self.test_tool = test_tool
         self.sir_programs_tests_number = sir_programs_tests_number
 
-    sir_programs = ["MavenProjectJ4_pre-fix","MavenProjectJ4_post-fix","MavenProjectJ5_pre-fix","MavenProjectJ5_post-fix"]
-    sir_programs_rep_values = {"MavenProjectJ4_pre-fix": 1, "MavenProjectJ4_post-fix": 1, "MavenProjectJ5_pre-fix": 1, "MavenProjectJ5_post-fix": 1}
-    penalties_dictionary = {"MavenProjectJ4_pre-fix": None, "MavenProjectJ4_post-fix": None, "MavenProjectJ5_pre-fix": None, "MavenProjectJ5_post-fix": None}
-    qubos_dictionary = {"MavenProjectJ4_pre-fix": [], "MavenProjectJ4_post-fix": [], "MavenProjectJ5_pre-fix": [], "MavenProjectJ5_post-fix": []}
+    # example programs
+    # sir_programs = ["MavenProjectJ4_pre-fix","MavenProjectJ4_post-fix","MavenProjectJ5_pre-fix","MavenProjectJ5_post-fix"]
+    # sir_programs_rep_values = {"MavenProjectJ4_pre-fix": 1, "MavenProjectJ4_post-fix": 1, "MavenProjectJ5_pre-fix": 1, "MavenProjectJ5_post-fix": 1}
+    # penalties_dictionary = {"MavenProjectJ4_pre-fix": None, "MavenProjectJ4_post-fix": None, "MavenProjectJ5_pre-fix": None, "MavenProjectJ5_post-fix": None}
+    # qubos_dictionary = {"MavenProjectJ4_pre-fix": [], "MavenProjectJ4_post-fix": [], "MavenProjectJ5_pre-fix": [], "MavenProjectJ5_post-fix": []}
+
+    # real programs
+    sir_programs = ["avro_pre-fix", "avro_post-fix", "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
+    sir_programs_rep_values = {"avro_pre-fix": 1, "avro_post-fix": 1, "hive-standalone-metastore-common_pre-fix": 1, "hive-standalone-metastore-common_post-fix": 1}
+    penalties_dictionary = {"avro_pre-fix": None, "avro_post-fix": None, "hive-standalone-metastore-common_pre-fix": None, "hive-standalone-metastore-common_post-fix": None}
+    qubos_dictionary = {"avro_pre-fix": [], "avro_post-fix": [], "hive-standalone-metastore-common_pre-fix": [], "hive-standalone-metastore-common_post-fix": []}
+
     alpha = 0.5
     executed_lines_test_by_test = dict()
     test_coverage_line_by_line = dict()
@@ -51,10 +59,10 @@ class SelectQAOA:
             return d
 
     def load_file_contents(self):
-        executed_lines_test_by_test_json_filepath = f"../../data_example/merged/{self.test_tool}/executed_lines_test_by_test_all_programs.json"
-        test_coverage_line_by_line_json_filepath = f"../../data_example/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
-        test_cases_cost_json_filepath= f"../../data_example/merged/{self.test_tool}/test_cases_costs_all_programs.json"
-        total_program_lines_json_filepath = f"../../data_example/merged/{self.test_tool}/total_program_lines_all_programs.json"
+        executed_lines_test_by_test_json_filepath = f"../../data/merged/{self.test_tool}/executed_lines_test_by_test_all_programs.json"
+        test_coverage_line_by_line_json_filepath = f"../../data/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
+        test_cases_cost_json_filepath= f"../../data/merged/{self.test_tool}/test_cases_costs_all_programs.json"
+        total_program_lines_json_filepath = f"../../data/merged/{self.test_tool}/total_program_lines_all_programs.json"
 
         with open(executed_lines_test_by_test_json_filepath, "r") as file:
             # dictionary that, for each sir program, associates at each LINE of that program the LIST of TESTS COVERING it
@@ -185,11 +193,11 @@ class SelectQAOA:
             # Display the plot
             # plt.show()
 
-            # plot_path = "../../results/selectqaoa/ideal/" + sir_program + "-clusters.png"
-            plot_path = sir_program + "-clusters.png"
+            # plot_path = "../../results/qaoa_tcs/ideal/" + sir_program + "-clusters.png"
+            # plot_path = sir_program + "-clusters.png"
 
             # Save the plot
-            plt.savefig(plot_path)
+            # plt.savefig(plot_path)
 
         # print(self.clusters_dictionary)
 
@@ -309,10 +317,10 @@ class SelectQAOA:
             qaoa = QAOA(sampler=sampling_noise_sampler, optimizer=COBYLA(500),reps=self.sir_programs_rep_values[sir_program])
             # the fronts will be saved into files
             print("Executing Ideal Simulator for Program: " + sir_program)
-            dir_path = f"../../results/selectqaoa/ideal/{self.test_tool}"
+            dir_path = f"../../results/qaoa_tcs/ideal/{self.test_tool}"
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
-            file_path = "../../results/selectqaoa/ideal/" + self.test_tool + "/" + sir_program + "-data.json"
+            file_path = "../../results/qaoa_tcs/ideal/" + self.test_tool + "/" + sir_program + "-data.json"
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
@@ -389,10 +397,10 @@ class SelectQAOA:
             qaoa = QAOA(sampler=fake_sampler, optimizer=COBYLA(500), reps=self.sir_programs_rep_values[sir_program])
             # the fronts will be saved into files
             print("Executing Noise Simulator for Program: " + str(sir_program))
-            dir_path = f"../../results/selectqaoa/noise/{self.test_tool}"
+            dir_path = f"../../results/qaoa_tcs/noise/{self.test_tool}"
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
-            file_path = "../../results/selectqaoa/noise/" + self.test_tool + "/" + sir_program + "-data.json"
+            file_path = "../../results/qaoa_tcs/noise/" + self.test_tool + "/" + sir_program + "-data.json"
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
@@ -464,10 +472,12 @@ def main():
     sir_programs_tests_number = {}
     if testTool == "junit":
         # junit tests
-        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 30, "MavenProjectJ4_post-fix": 30, "MavenProjectJ5_pre-fix": 30, "MavenProjectJ5_post-fix": 30}
+        # sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 30, "MavenProjectJ4_post-fix": 30, "MavenProjectJ5_pre-fix": 30, "MavenProjectJ5_post-fix": 30}
+        sir_programs_tests_number = {"avro_pre-fix": 130, "avro_post-fix": 130, "hive-standalone-metastore-common_pre-fix": 306, "hive-standalone-metastore-common_post-fix": 306}
     elif testTool == "jmh":
         # jmh benchs
-        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
+        # sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
+        sir_programs_tests_number = {"avro_pre-fix": 333, "avro_post-fix": 333, "hive-standalone-metastore-common_pre-fix": 413, "hive-standalone-metastore-common_post-fix": 431}
     selectQAOA = SelectQAOA(testTool, sir_programs_tests_number)
     selectQAOA.load_file_contents()
     selectQAOA.process_clusters()

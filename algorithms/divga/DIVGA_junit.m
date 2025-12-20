@@ -1,15 +1,24 @@
-% Program configuration
-%programs = {'flex'};
-%program_config.flex = struct('N', 567, 'M', 400, 'coverage_norm', 4357, 'max_iterations', 500);
-programs = {'MavenProjectJ4'};
-% DIV-GA parameters: 
-% N: starting number of all the elements
-% M: size of the output population
+% DIV-GA parameters:
+% programs: the names of the programs
+% N: the number of test cases
+% M: the size of the population
 % coverage_norm: the number of covered lines
-% max_iterations: the number of iterations for the three subroutines (e.g.
-% if I want 1000 toiterations
-% max_iterations va fatto per 1000/3, perche porta avanti tre subroutine di ottimizzazione
-program_config.MavenProjectJ4 = struct('N', 52, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+% max_iterations: the number of iterations for the three subroutines 
+% (e.g. if I want 1000 total iterations: 1000 = 334 * 3)
+
+% parameters for junit tests (example programs)
+%programs = {'MavenProjectJ4junitpre', 'MavenProjectJ4junitpost', 'MavenProjectJ5junitpre', 'MavenProjectJ5junitpost'};
+%program_config.MavenProjectJ4junitpre = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+%program_config.MavenProjectJ4junitpost = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+%program_config.MavenProjectJ5junitpre = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+%program_config.MavenProjectJ5junitpost = struct('N', 30, 'M', 20, 'coverage_norm', 68, 'max_iterations', 334);
+
+% parameters for junit tests (real programs)
+programs = {'avrojunitpre', 'avrojunitpost', 'hivejunitpre', 'hivejunitpost'};
+program_config.avrojunitpre = struct('N', 130, 'M', 200, 'coverage_norm', 832, 'max_iterations', 334);
+program_config.avrojunitpost = struct('N', 130, 'M', 200, 'coverage_norm', 828, 'max_iterations', 334);
+program_config.hivejunitpre = struct('N', 306, 'M', 300, 'coverage_norm', 1751, 'max_iterations', 334);
+program_config.hivejunitpost = struct('N', 306, 'M', 300, 'coverage_norm', 1754, 'max_iterations', 334);
 
 %for each program
 %costs is an array of size N
@@ -28,15 +37,13 @@ function total_fitness = computeFitness(population, costs, coverage, norm_factor
                 selected_lines = [selected_lines, coverage{j}];
             end
         end
-        % per prendere le righe uniche, va bene anche rappresentazione stringa
-        % inizialmente la coverage sarebbe un cell array, quindi a prescindere
-        % seleziona le celle uniche che rappresentano una riga, indipendente
-        % dalla rappresentazione usata (intero, stringa, hash)
+
+        % matlab loads the coverage on a cell array
+        % unique() functions takes the unique cells
+        % the cells can be of any type we want to use for the task
+        % (example of types for easy uniqueness: integer, string, hash)
         unique_covered_lines = unique(selected_lines);
         total_coverage = -length(unique_covered_lines) / norm_factor;
-
-        %total_failures = -sum(solution .* revealed_failures) / sum(revealed_failures ~= 0);
-        %fitness_values(i) = total_cost + total_coverage + total_failures;
 
         fitness_values(i) = total_cost + total_coverage;
     end
@@ -53,17 +60,13 @@ function f = fitnessFunction(x, costs, coverage, norm_factor)
             selected_lines = [selected_lines, coverage{i}];
         end
     end
-    % per prendere le righe uniche, va bene anche rappresentazione stringa
-    % inizialmente la coverage sarebbe un cell array, quindi a prescindere
-    % seleziona le celle uniche che rappresentano una riga, indipendente
-    % dalla rappresentazione usata (intero, stringa, hash)
+
+    % matlab loads the coverage on a cell array
+    % unique() functions takes the unique cells
+    % the cells can be of any type we want to use for the task
+    % (example of types for easy uniqueness: integer, string, hash)
     unique_covered_lines = unique(selected_lines);
     total_coverage = -length(unique_covered_lines) / norm_factor;
-
-    %nonzero_failures = revealed_failures(revealed_failures ~= 0);
-    %total_failures = -sum(x .* revealed_failures)/length(nonzero_failures);
-
-    %f = [total_cost, total_coverage, total_failures];
 
     f = [total_cost, total_coverage];
 end
@@ -77,13 +80,12 @@ for prog = programs
     norm_factor = cfg.coverage_norm;
     max_iterations = cfg.max_iterations;
 
-    fprintf('\n=== Running for %s ===\n', program);
+    fprintf('\n=== Executing DIVGA Algorithm for: %s ===\n', program);
     
     % Example data for test cases
     
     %get costs
     costs = str2double(strsplit(fileread([program '_costs.txt']), ','));
-    
     
     % Read the content of the text file
     fileID = fopen([program '_coverage.txt'], 'r');
@@ -92,9 +94,7 @@ for prog = programs
     % Initialize the coverage cell array
     coverage = cell(length(rawData{1}), 1);
     for i = 1:length(rawData{1})
-        % coverage{i} = str2double(strsplit(rawData{1}{i}, ','));
-        % le righe hanno una notazione a stringa, non serve convertirle
-        coverage{i} = strsplit(rawData{1}{i}, '},');
+        coverage{i} = strsplit(rawData{1}{i}, '},'); % no need to convert the rawData, a cell array can be of strings
     end
 
     for i = 1:numel(coverage)
@@ -106,12 +106,6 @@ for prog = programs
         end
         coverage{i} = inner;  % assign back
     end
-
-    %get revealed_failures
-    %revealed_failures = str2double(strsplit(fileread([program '_revealed_failures.txt']), ','));
-    
-    % Define the fitness function handle
-    %fitnessFcn = @(x) fitnessFunction(x, costs, coverage, revealed_failures, norm_factor);
     
     % Define the fitness function handle
     fitnessFcn = @(x) fitnessFunction(x, costs, coverage, norm_factor);
@@ -494,8 +488,9 @@ for prog = programs
     json_data.execution_times = execution_times
     json_data.DIVGA_mean_execution_time_ms = mean_execution_time;
     json_data.std_dev = exec_times_std_dev;
-    
-    json_file = sprintf('../../results/divga/%s_pareto_fronts_divga.json', program);
+
+    % output for junit tests
+    json_file = sprintf('../../results/divga/junit/%s_pareto_fronts_divga.json', program);
     json_str = jsonencode(json_data);
     fid = fopen(json_file, 'w');
     fprintf(fid, '%s', json_str);

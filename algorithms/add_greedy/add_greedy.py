@@ -13,9 +13,14 @@ class AdditionalGreedy:
         self.test_tool = test_tool
         self.sir_programs_tests_number = sir_programs_tests_number
 
-    sir_programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
+    # example programs
+    # sir_programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
+    # sir_programs_rep_values = {"MavenProjectJ4_pre-fix": 1, "MavenProjectJ4_post-fix": 1, "MavenProjectJ5_pre-fix": 1, "MavenProjectJ5_post-fix": 1}
 
-    sir_programs_rep_values = {"MavenProjectJ4_pre-fix": 1, "MavenProjectJ4_post-fix": 1, "MavenProjectJ5_pre-fix": 1, "MavenProjectJ5_post-fix": 1}
+    # real programs
+    sir_programs = ["avro_pre-fix", "avro_post-fix", "hive_pre-fix", "hive_post-fix"]
+    sir_programs_rep_values = {"avro_pre-fix": 1, "avro_post-fix": 1, "hive-standalone-metastore-common_pre-fix": 1, "hive-standalone-metastore-common_post-fix": 1}
+
     executed_lines_test_by_test = dict()
     faults_dictionary = dict()
     test_coverage_line_by_line = dict()
@@ -32,10 +37,10 @@ class AdditionalGreedy:
             return d
 
     def load_files_content(self):
-        with open(f"../../data_example/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json", "r") as file:
+        with open(f"../../data/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json", "r") as file:
             # dictionary that, for each sir program, associates at each TEST of that program the LIST of LINES COVERED by it
             self.test_coverage_line_by_line = self.json_keys_to_int(json.load(file))  # {program1:{tc1:[linei,linej,...,linek],tc2:...}
-        with open(f"../../data_example/merged/{self.test_tool}/test_cases_costs_all_programs.json", "r") as file:
+        with open(f"../../data/merged/{self.test_tool}/test_cases_costs_all_programs.json", "r") as file:
             # dictionary that, for each sir program, associates at each TEST its EXECUTION COST
             self.test_cases_costs = self.json_keys_to_int(json.load(file))  # {program1:{tc1:ex_cost1,tc2:ex_cost2,...,tcn:ex_costn},program2:...}
 
@@ -104,10 +109,10 @@ def main():
     testTool = sys.argv[1]
     if testTool == "junit":
         # junit tests
-        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 30, "MavenProjectJ4_post-fix": 30, "MavenProjectJ5_pre-fix": 30, "MavenProjectJ5_post-fix": 30}
+        sir_programs_tests_number = {"avro_pre-fix": 130, "avro_post-fix": 130, "hive_pre-fix": 306, "hive_post-fix": 306}
     elif testTool == "jmh":
         # jmh benchs
-        sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
+        sir_programs_tests_number = {"avro_pre-fix": 333, "avro_post-fix": 333, "hive_pre-fix": 414, "hive_post-fix": 414}
     additionalgreedy = AdditionalGreedy(testTool, sir_programs_tests_number)
     additionalgreedy.load_files_content()
     additionalgreedy.run_algo()
