@@ -37,10 +37,10 @@ class SelectQAOA:
     # qubos_dictionary = {"MavenProjectJ4_pre-fix": [], "MavenProjectJ4_post-fix": [], "MavenProjectJ5_pre-fix": [], "MavenProjectJ5_post-fix": []}
 
     # real programs
-    sir_programs = ["avro_pre-fix", "avro_post-fix", "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
-    sir_programs_rep_values = {"avro_pre-fix": 1, "avro_post-fix": 1, "hive-standalone-metastore-common_pre-fix": 1, "hive-standalone-metastore-common_post-fix": 1}
-    penalties_dictionary = {"avro_pre-fix": None, "avro_post-fix": None, "hive-standalone-metastore-common_pre-fix": None, "hive-standalone-metastore-common_post-fix": None}
-    qubos_dictionary = {"avro_pre-fix": [], "avro_post-fix": [], "hive-standalone-metastore-common_pre-fix": [], "hive-standalone-metastore-common_post-fix": []}
+    sir_programs = ["avro_pre-fix", "avro_post-fix", "hive_pre-fix", "hive_post-fix"]
+    sir_programs_rep_values = {"avro_pre-fix": 1, "avro_post-fix": 1, "hive_pre-fix": 1, "hive_post-fix": 1}
+    penalties_dictionary = {"avro_pre-fix": None, "avro_post-fix": None, "hive_pre-fix": None, "hive_post-fix": None}
+    qubos_dictionary = {"avro_pre-fix": [], "avro_post-fix": [], "hive_pre-fix": [], "hive_post-fix": []}
 
     alpha = 0.5
     executed_lines_test_by_test = dict()
@@ -473,11 +473,11 @@ def main():
     if testTool == "junit":
         # junit tests
         # sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 30, "MavenProjectJ4_post-fix": 30, "MavenProjectJ5_pre-fix": 30, "MavenProjectJ5_post-fix": 30}
-        sir_programs_tests_number = {"avro_pre-fix": 130, "avro_post-fix": 130, "hive-standalone-metastore-common_pre-fix": 306, "hive-standalone-metastore-common_post-fix": 306}
+        sir_programs_tests_number = {"avro_pre-fix": 130, "avro_post-fix": 130, "hive_pre-fix": 306, "hive_post-fix": 306}
     elif testTool == "jmh":
         # jmh benchs
         # sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
-        sir_programs_tests_number = {"avro_pre-fix": 333, "avro_post-fix": 333, "hive-standalone-metastore-common_pre-fix": 413, "hive-standalone-metastore-common_post-fix": 431}
+        sir_programs_tests_number = {"avro_pre-fix": 333, "avro_post-fix": 333, "hive_pre-fix": 414, "hive_post-fix": 414}
     selectQAOA = SelectQAOA(testTool, sir_programs_tests_number)
     selectQAOA.load_file_contents()
     selectQAOA.process_clusters()

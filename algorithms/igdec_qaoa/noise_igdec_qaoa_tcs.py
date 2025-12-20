@@ -271,8 +271,8 @@ if __name__ == '__main__':
     num_experiment = 10
     reps = 1
     problem_size = 7
-    programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
-    # programs = ["avro_pre-fix", "avro_post-fix", "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
+    # programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
+    programs = ["avro_pre-fix", "avro_post-fix", "hive_pre-fix", "hive_post-fix"]
     for file_name in programs:
         print("Executing IGDec-QAOA Noise Algorithm for: " + file_name)
         # datasets_path = "../../data_example/processed/" + file_name + "/" + test_tool + "/" + file_name + ".csv"
