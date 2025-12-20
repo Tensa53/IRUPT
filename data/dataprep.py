@@ -286,8 +286,6 @@ class DataPrep:
 
         file_name = prog_name + self.testTool + fix_status + "_coverage.txt"
 
-        print(file_name)
-
         with open(f"{self.processedDataInitialPath}{file_name}", "w") as text_file:
             for coverage_matrix_key in coverage_matrix.keys():
                 coverage_matrix_row = coverage_matrix[coverage_matrix_key]
@@ -307,9 +305,7 @@ class DataPrep:
 
         fix_status = self.program[self.program.find("_p")+1:self.program.rfind("-")]
 
-        file_name = prog_name + self.testTool + fix_status + "_cost.txt"
-
-        print(file_name)
+        file_name = prog_name + self.testTool + fix_status + "_costs.txt"
 
         with open(f"{self.processedDataInitialPath}{file_name}", "w") as text_file:
             times = list(time_matrix.values())
@@ -400,49 +396,49 @@ class DataPrep:
 
 def main():
     method_lines_to_search_dict = {
-        "hive-standalone-metastore-common": [ "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{565;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{566;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{567;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{568;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{569;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{570;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{571;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{572;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{573;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{574;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{575;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{576;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{577;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{578;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{579;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{580;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{581;}",
-                                              "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{582;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{802;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{803;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{804;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{805;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{806;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{807;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{808;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{809;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{810;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{811;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{812;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{813;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{814;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{815;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{816;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{817;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{818;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{819;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{820;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{821;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{822;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{823;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{824;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}",
-                                              "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}" ],
+        "hive": [ "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{565;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{566;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{567;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{568;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{569;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{570;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{571;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{572;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{573;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{574;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{575;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{576;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{577;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{578;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{579;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{580;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{581;}",
+                  "org.apache.hadoop.hive.metastore.HiveMetaStoreClient{582;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{802;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{803;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{804;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{805;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{806;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{807;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{808;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{809;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{810;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{811;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{812;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{813;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{814;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{815;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{816;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{817;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{818;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{819;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{820;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{821;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{822;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{823;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{824;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}",
+                  "org.apache.hadoop.hive.metastore.utils.MetaStoreUtils{825;}" ],
         "avro": [ "org.apache.avro.data.RecordBuilderBase{76;}",
                   "org.apache.avro.data.RecordBuilderBase{77;}",
                   "org.apache.avro.util.Utf8{64;}",
@@ -478,9 +474,8 @@ def main():
             dataprep = DataPrep()
             dataprep.testTool = arg
             # dataprep.programs = ["MavenProjectJ4_pre-fix", "MavenProjectJ4_post-fix", "MavenProjectJ5_pre-fix", "MavenProjectJ5_post-fix"]
-            dataprep.programs = ["avro_pre-fix", "avro_post-fix", "hive-standalone-metastore-common_pre-fix", "hive-standalone-metastore-common_post-fix"]
+            dataprep.programs = ["avro_pre-fix", "avro_post-fix", "hive_pre-fix", "hive_post-fix"]
             for program in dataprep.programs:
-                print(program[0:program.find("_")])
                 dataprep.program = program
                 print("Processing the data for: " + program)
                 dataprep.program = program
@@ -491,29 +486,29 @@ def main():
                 dataprep.rawDataInitialPath = f"raw/{dataprep.program}/{dataprep.testTool}/"
                 dataprep.processedDataInitialPath = f"processed/{dataprep.program}/{dataprep.testTool}/"
                 dataprep.mergedDataInitialPath= f"merged/{dataprep.testTool}/"
-                # # methods that create coverage and time matrix from jacoco, junit, jmh reports
-                # dataprep.create_coverage_matrix()
-                # dataprep.create_time_matrix()
-                # # # methods that create input json files for Add-Greedy and first two files for Select-QAOA
-                # dataprep.coverage_matrix_reverse()
-                # # methods that create remaining input json files for Select-QAOA
-                # dataprep.map_testcases_to_number()
-                # dataprep.maps_classlines_to_number()
-                # dataprep.map_coverage_matrix_keys_to_testcase_number()
-                # dataprep.map_coverage_matrix_element_entries_to_classline_number()
-                # dataprep.map_coverage_matrix_reverse_keys_to_classline_number()
-                # dataprep.map_coverage_matrix_reverse_element_entries_to_testcase_number()
-                # dataprep.map_time_matrix_keys_to_testcase_number()
-                # # methods that create input text files for DIV-GA
+                # methods that create coverage and time matrix from jacoco, junit, jmh reports
+                dataprep.create_coverage_matrix()
+                dataprep.create_time_matrix()
+                # methods that create input json files for Add-Greedy and first two files for QAOA-TCS
+                dataprep.coverage_matrix_reverse()
+                # methods that create remaining input json files for QAOA-TCS
+                dataprep.map_testcases_to_number()
+                dataprep.maps_classlines_to_number()
+                dataprep.map_coverage_matrix_keys_to_testcase_number()
+                dataprep.map_coverage_matrix_element_entries_to_classline_number()
+                dataprep.map_coverage_matrix_reverse_keys_to_classline_number()
+                dataprep.map_coverage_matrix_reverse_element_entries_to_testcase_number()
+                dataprep.map_time_matrix_keys_to_testcase_number()
+                # methods that create input text files for DIV-GA
                 dataprep.plain_from_coverage_matrix()
                 dataprep.plain_from_time_matrix()
-                # # methods that create input csv file for IGDec-QAOA
+                # methods that create input csv file for IGDec-QAOA
                 dataprep.csv_from_coverage_matrix_and_time_matrix()
-                # # # extra methods for insight
+                # extra methods for insight
                 # dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
-                # dataprep.filter_testcases_with_no_coverage()
-            # method that merge all the json files program per program, for Select-QAOA and Add-Greedy
-            # dataprep.merge()
+                dataprep.filter_testcases_with_no_coverage()
+            # method that merge all the json files program per program, for QAOA-TCS and Add-Greedy
+            dataprep.merge()
     except IndexError:
         print("Please provide a valid test tool name as an argument: junit or jmh")
         exit(1)

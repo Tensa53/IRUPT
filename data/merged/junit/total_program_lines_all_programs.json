@@ -1,6 +1,6 @@
 {
   "avro_pre-fix":2887,
   "avro_post-fix":2884,
-  "hive-standalone-metastore-common_pre-fix":11376,
-  "hive-standalone-metastore-common_post-fix":11350
+  "hive_pre-fix":11376,
+  "hive_post-fix":11350
 }
