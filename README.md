@@ -124,7 +124,7 @@ This phase gives in output the following files for each analyzed program and pla
   - **test_coverage_line_by_line.json**
   - **executed_lines_test_by_test.json**
   - **test_cases_costs.json**;
-  - **ProgramName_costs.txt**
+  - **ProgramName_cost.txt**
   - **ProgramName_coverage.txt**
   - **ProgramName.csv**
 
@@ -139,8 +139,6 @@ these commands inside the folder:
 > python dataprep.py junit #to prepare data from junit raw data
 > 
 > python dataprep.py jmh #to prepare data from jmh raw data
-
-You can also use the **dataprep.sh** bash script.
 
 ### 3. Generation of tests and benchmarks
 The software to analyze can miss some of the tests and benchmarks classes that are necessary to correctly find the 
@@ -176,17 +174,23 @@ The input files for this algorithm are:
 - **test_cases_costs_all_programs.json**.
 
 To execute this algorithm run this command inside the folder:
-> python add_greedy.py
+> python add_greedy.py junit #analyze junit data
+> 
+> python add_greedy.py jmh #analyze jmh data
 
 **div_ga/**: Contains the DIV-GA implementation. This algorithm creates a subset of the original test suite, selecting 
 a test case to insert in the subset by the best fitness function, based on statement coverage and execution time
 computed at every iteration of the genetic routine.
 The input files for this algorithm are:
-- **\<ProgramName>_costs.txt**;
+- **\<ProgramName>_cost.txt**;
 - **\<ProgramName>_coverage.txt**.
 
-To execute this algorithm run this command inside the folder:
-> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA.m');exit;"
+These files have to be copied inside the algorithm folder.
+
+To execute this algorithm run these commands inside the folder:
+> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_junit.m');exit;" #analyze junit data
+> 
+> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_jmh.m');exit;" #analyze jmh data
 
 **igdec_qaoa**: Contains the IGDec-QAOA implementation. This algorithm creates a subset of the original test suite, 
 selecting a test case to insert in the subset by how it "impacts" the fitness function value.
@@ -194,11 +198,15 @@ The input files for this algorithm are:
 - **\<ProgramName>.csv**.
 
 To execute this algorithm run these commands inside the folder:
-> python loch_qaoa_tcs.py #ideal simulator
+> python igdec_qaoa_tcs.py junit #ideal simulator (junit data)
 > 
-> python noise_loch_qaoa_tcs.py #noise simulator
+> python igdec_qaoa_tcs.py jmh #ideal simulator (jmh data)
+> 
+> python noise_igdec_qaoa_tcs.py junit #noise simulator (junit data)
+> 
+> python noise_igdec_qaoa_tcs.py jmh #noise simulator (jmh data)
 
-**select_qaoa/**: Contains the Select-QAOA implementation. This algorithm creates a subset of the original test suite 
+**qaoa_tcs/**: Contains the QAOA-TCS implementation. This algorithm creates a subset of the original test suite 
 selecting a test case to insert in the subset from the created clusters, by a similarity function.
 The input files for this algorithm are:
   - **executed_lines_test_by_test_all_programs.json**;
@@ -207,9 +215,13 @@ The input files for this algorithm are:
   - **total_program_lines_all_programs.json**
 
 To execute this algorithm run these command inside the folder:
-> python select_qaoa.py ideal #ideal simulator
+> python select_qaoa.py ideal junit #ideal simulator (junit data)
 > 
-> python select_qaoa.py noise #noise simulator
+> python select_qaoa.py ideal jmh #ideal simulator (jmh data)
+>
+> python select_qaoa.py noise junit #noise simulator (junit data)
+> 
+> python select_qaoa.py noise jmh #noise simulator (jmh data)
 
 This phase can be automated by the **run_algorithms.sh** script located in the **scripts/** folder, that also automates
 the data processing phase.
@@ -226,7 +238,7 @@ The chosen software are from the Apache Software Foundation:
 - **Hive**: the **standalone-metastore-common** module is analyzed;
 
 The collected data are statistically compared after executing the algorithms in two different ways:
-- **"A monte" execution**: The algorithms are executed on the junit data, to obtain a subset of unit tests and then
-converted to micro benchmarks with [junit-to-jmh](https://github.com/alniniclas/junit-to-jmh);
+- **"A monte" execution**: The algorithms are executed on the junit data, to obtain a subset of unit tests that they
+will be converted to micro benchmarks wrapping the junit tests, with [junit-to-jmh](https://github.com/alniniclas/junit-to-jmh);
 - **"A valle" execution**: The micro-benchmarks are directly generated from source code with LLMs. The algorithms are
 executed on the jmh data, to obtain a subset of micro-benchmarks.
