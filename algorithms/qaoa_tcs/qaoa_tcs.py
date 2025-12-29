@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import statistics
 import warnings
+import plotly.graph_objects as go
 
 from qiskit_optimization import QuadraticProgram
 from qiskit_algorithms.optimizers import COBYLA
@@ -25,9 +26,11 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 class SelectQAOA:
     sir_programs_tests_number = {}
     test_tool = ""
+    mode = ""
 
-    def __init__(self, test_tool, sir_programs_tests_number):
+    def __init__(self, test_tool, mode, sir_programs_tests_number):
         self.test_tool = test_tool
+        self.mode = mode
         self.sir_programs_tests_number = sir_programs_tests_number
 
     # example programs
@@ -49,6 +52,17 @@ class SelectQAOA:
     total_program_lines = dict()
     clusters_dictionary = dict()
 
+    def to_json_safe(self, obj):
+        if isinstance(obj, defaultdict):
+            obj = dict(obj)
+        if isinstance(obj, dict):
+            return {str(self.to_json_safe(k)): self.to_json_safe(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self.to_json_safe(v) for v in obj]
+        if isinstance(obj, np.generic):  # np.int32, np.int64, etc.
+            return int(obj)
+        return obj
+
     def json_keys_to_int(self, d):
         """This method correctly converts the data"""
         if isinstance(d, dict):
@@ -59,6 +73,13 @@ class SelectQAOA:
             return d
 
     def load_file_contents(self):
+        # example programs data
+        # executed_lines_test_by_test_json_filepath = f"../../data_example/merged/{self.test_tool}/executed_lines_test_by_test_all_programs.json"
+        # test_coverage_line_by_line_json_filepath = f"../../data_example/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
+        # test_cases_cost_json_filepath= f"../../data_example/merged/{self.test_tool}/test_cases_costs_all_programs.json"
+        # total_program_lines_json_filepath = f"../../data_example/merged/{self.test_tool}/total_program_lines_all_programs.json"
+
+        # real programs data
         executed_lines_test_by_test_json_filepath = f"../../data/merged/{self.test_tool}/executed_lines_test_by_test_all_programs.json"
         test_coverage_line_by_line_json_filepath = f"../../data/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
         test_cases_cost_json_filepath= f"../../data/merged/{self.test_tool}/test_cases_costs_all_programs.json"
@@ -93,9 +114,23 @@ class SelectQAOA:
     def process_clusters(self):
         for sir_program in self.sir_programs:
 
+            dir_path = f"../../results/qaoa_tcs/{self.mode}/clusters/{self.test_tool}"
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+
+            # print("Processing clusters for: " + sir_program)
+
+            test_suite_stmt_cov = set()
+
+            for line in self.executed_lines_test_by_test[sir_program].keys():
+                    test_suite_stmt_cov.add(int(line))
+
+            # print(len(test_suite_stmt_cov))
+
             test_cases_stmt_cov = []
             for test_case in self.test_coverage_line_by_line[sir_program].keys():
-                test_cases_stmt_cov.append(len(self.test_coverage_line_by_line[sir_program][test_case]))
+                # test_cases_stmt_cov.append(len(self.test_coverage_line_by_line[sir_program][test_case]))
+                test_cases_stmt_cov.append(len(self.test_coverage_line_by_line[sir_program][test_case])/len(test_suite_stmt_cov))
 
             # Normalize data
             data = np.column_stack((list(self.test_cases_costs[sir_program].values()), test_cases_stmt_cov))
@@ -110,6 +145,10 @@ class SelectQAOA:
             start = time.time()
             linkage_matrix = linkage(normalized_data, method='ward')
             clusters = fcluster(linkage_matrix, t=num_clusters, criterion='maxclust')
+
+            clust_list = list(enumerate(clusters))
+            # print(len(clust_list))
+            # print(clust_list)
 
             # Organize test cases by cluster
             clustered_data = defaultdict(list)
@@ -163,16 +202,15 @@ class SelectQAOA:
                     "tot_stmt_cov": tot_cluster_stmt_cov  # Avg stmt coverage per test case in cluster
                 }
 
-            # Plotting the clusters in 3D space
-            fig = plt.figure(figsize=(10, 7))
-            ax = fig.add_subplot(111, projection='3d')
-
             # Extracting data for plotting
             exec_costs = np.array(list(self.test_cases_costs[sir_program].values()))
             stmt_covs = np.array(test_cases_stmt_cov)
 
+            # Plotting the clusters in 2D space
+            fig, ax = plt.subplots(figsize=(12, 8))
+
             # Plot each cluster with a different color
-            colors = plt.cm.get_cmap("tab10", num_clusters)  # A colormap with as many colors as clusters
+            colors = plt.cm.get_cmap("tab10", num_clusters)
             for cluster_id in clustered_data.keys():
                 cluster_indices = clustered_data[cluster_id]
 
@@ -181,25 +219,67 @@ class SelectQAOA:
                     exec_costs[cluster_indices],
                     stmt_covs[cluster_indices],
                     color=colors(cluster_id),
-                    label=f"Cluster {cluster_id + 1}"
+                    label=f"Cluster {cluster_id + 1}",
+                    alpha=0.6,
+                    s=50
                 )
 
             # Label the axes
-            ax.set_xlabel("Execution Cost")
-            ax.set_zlabel("Statement Coverage")
-            ax.legend()
-            ax.set_title("Test Case Clustering Visualization for Program: " + sir_program)
+            ax.set_xlabel("Execution Cost", fontsize=12)
+            ax.set_ylabel("Statement Coverage", fontsize=12)
+            ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
+            ax.set_title("Test Case Clustering Visualization for Program: " + sir_program, fontsize=14)
+            ax.grid(True, alpha=0.3)
 
-            # Display the plot
-            # plt.show()
+            cluster_path = dir_path + "/" + sir_program + "-clusters.json"
 
-            # plot_path = "../../results/qaoa_tcs/ideal/" + sir_program + "-clusters.png"
-            # plot_path = sir_program + "-clusters.png"
+            json_safe_data = self.to_json_safe(clustered_data)
 
-            # Save the plot
-            # plt.savefig(plot_path)
+            # plot_path = dir_path + sir_program + "-clusters.pdf"
+            #
+            # # Save the plot as PDF with bbox_inches to handle legend outside plot area
+            # plt.savefig(plot_path, bbox_inches='tight', dpi=100)
+            #
+            with open(cluster_path, "w") as f:
+                json.dump(json_safe_data, f)
 
-        # print(self.clusters_dictionary)
+            # Save the plot as interactive HTML
+            plot_path_html = dir_path + "/" + sir_program + "-clusters.html"
+
+            # Create interactive Plotly plot
+            plotly_fig = go.Figure()
+
+            colors_list = plt.cm.tab10.colors
+            for cluster_id in clustered_data.keys():
+                cluster_indices = clustered_data[cluster_id]
+                color_idx = cluster_id % len(colors_list)
+                rgb_color = f'rgb({int(colors_list[color_idx][0]*255)},{int(colors_list[color_idx][1]*255)},{int(colors_list[color_idx][2]*255)})'
+
+                plotly_fig.add_trace(go.Scatter(
+                    x=exec_costs[cluster_indices],
+                    y=stmt_covs[cluster_indices],
+                    mode='markers',
+                    name=f'Cluster {cluster_id + 1}',
+                    marker=dict(
+                        size=8,
+                        color=rgb_color,
+                        opacity=0.6,
+                        line=dict(width=0.5, color='white')
+                    ),
+                    hovertemplate='<b>Cluster %{fullData.name}</b><br>Execution Cost: %{x:.2f}<br>Statement Coverage: %{y}<extra></extra>'
+                ))
+
+            plotly_fig.update_layout(
+                title=f"Test Case Clustering Visualization for Program: {sir_program}",
+                xaxis_title="Execution Cost",
+                yaxis_title="Statement Coverage",
+                hovermode='closest',
+                template='plotly_white',
+                width=1200,
+                height=800
+            )
+
+            plotly_fig.write_html(plot_path_html)
 
     def make_linear_terms(self, sir_program, cluster_test_cases, alpha):
         """Making the linear terms of QUBO"""
@@ -317,10 +397,10 @@ class SelectQAOA:
             qaoa = QAOA(sampler=sampling_noise_sampler, optimizer=COBYLA(500),reps=self.sir_programs_rep_values[sir_program])
             # the fronts will be saved into files
             print("Executing Ideal Simulator for Program: " + sir_program)
-            dir_path = f"../../results/qaoa_tcs/ideal/{self.test_tool}"
+            dir_path = f"../../results/qaoa_tcs/ideal/data/{self.test_tool}"
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
-            file_path = "../../results/qaoa_tcs/ideal/" + self.test_tool + "/" + sir_program + "-data.json"
+            file_path = dir_path + "/" + sir_program + "-data.json"
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
@@ -397,14 +477,15 @@ class SelectQAOA:
             qaoa = QAOA(sampler=fake_sampler, optimizer=COBYLA(500), reps=self.sir_programs_rep_values[sir_program])
             # the fronts will be saved into files
             print("Executing Noise Simulator for Program: " + str(sir_program))
-            dir_path = f"../../results/qaoa_tcs/noise/{self.test_tool}"
+            dir_path = f"../../results/qaoa_tcs/noise/data/{self.test_tool}"
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
-            file_path = "../../results/qaoa_tcs/noise/" + self.test_tool + "/" + sir_program + "-data.json"
+            file_path = dir_path + "/" + sir_program + "-data.json"
             json_data = {}
             qpu_run_times = []
             pareto_fronts_building_times = []
-            experiments = 1
+            experiments = 10
+
             for i in range(experiments):
                 final_selected_tests = []
                 cluster_dict_index = 0
@@ -478,7 +559,7 @@ def main():
         # jmh benchs
         # sir_programs_tests_number = {"MavenProjectJ4_pre-fix": 52, "MavenProjectJ4_post-fix": 52, "MavenProjectJ5_pre-fix": 52, "MavenProjectJ5_post-fix": 52}
         sir_programs_tests_number = {"avro_pre-fix": 333, "avro_post-fix": 333, "hive_pre-fix": 414, "hive_post-fix": 414}
-    selectQAOA = SelectQAOA(testTool, sir_programs_tests_number)
+    selectQAOA = SelectQAOA(testTool, mode, sir_programs_tests_number)
     selectQAOA.load_file_contents()
     selectQAOA.process_clusters()
     selectQAOA.specify_penalties()

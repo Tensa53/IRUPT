@@ -431,6 +431,6 @@ if __name__ == '__main__':
             os.makedirs("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment))
         solution_df.to_csv("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/solution.csv")
 
-        json.dump(pareto_fronts, open("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/pareto_fronts.json", "w"))
+        json.dump(unique_pareto_fronts, open("../../results/igdec_qaoa/tcs/noise/qaoa_"+str(reps)+"/" + file_name + "/" + test_tool + "/size_" + str(problem_size) + "/" + str(num_experiment)+"/pareto_fronts.json", "w"))
 
         plot(fval_list, reps, file_name, problem_size)

@@ -37,10 +37,18 @@ class AdditionalGreedy:
             return d
 
     def load_files_content(self):
-        with open(f"../../data/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json", "r") as file:
+        # example programs data
+        # test_coverage_line_by_line = f"../../data_example/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
+        # test_cases_costs = f"../../data_example/merged/{self.test_tool}/test_cases_costs_all_programs.json"
+
+        # real programs data
+        test_coverage_line_by_line = f"../../data/merged/{self.test_tool}/test_coverage_line_by_line_all_programs.json"
+        test_cases_costs = f"../../data/merged/{self.test_tool}/test_cases_costs_all_programs.json"
+
+        with open(test_coverage_line_by_line, "r") as file:
             # dictionary that, for each sir program, associates at each TEST of that program the LIST of LINES COVERED by it
             self.test_coverage_line_by_line = self.json_keys_to_int(json.load(file))  # {program1:{tc1:[linei,linej,...,linek],tc2:...}
-        with open(f"../../data/merged/{self.test_tool}/test_cases_costs_all_programs.json", "r") as file:
+        with open(test_cases_costs, "r") as file:
             # dictionary that, for each sir program, associates at each TEST its EXECUTION COST
             self.test_cases_costs = self.json_keys_to_int(json.load(file))  # {program1:{tc1:ex_cost1,tc2:ex_cost2,...,tcn:ex_costn},program2:...}
 
