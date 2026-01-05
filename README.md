@@ -17,6 +17,8 @@ For the Python modules and algorithms, there is a requirements.txt inside the ro
 
 DIV-GA algorithm requires MATLAB R2025a and Global Optimization Toolbox.
 
+For the statistical analysis phase, an R installation is required.
+
 ### 1. Data Collection
 Some software will be chosen to retrieve the data and compute the metrics. The **java/** folder contains all the
 necessary code, organized in packages, that is necessary to add to the software to analyze it and collect the data:
@@ -112,9 +114,13 @@ execution time and its position maps the numerical identifier of the test case;
 14. **merge**: each output of the previous functions (except the .txt and .csv ones) and the **total-lines.json** file 
 are merged to create various final json files with every software data.
 15. **search_covered_method_lines**: given the coverage matrix reversed and a list of class lines, searches if a line
-is covered by a test case, filtering the coverage matrix reversed.
+is covered by a test case, filtering the coverage matrix reversed;
+16. **filter_testcases_with_no_coverage**: after the data are processed, searches if a test has no coverage. This
+ensures that the matrix have no "holes" that could interfere the algorithm executions. If this function finds any tests,
+the data have to be re-generated.
 
-This phase gives in output the following files for each analyzed program and placed in **data/processed/** folder:
+This phase gives in output the files for each analyzed program and placed in **data/processed/** folder. The main files
+necessary for the algorithm are the following:
 - **ProgramName/**:
   - **coverage_matrix.json**;
   - **time_matrix.json**;
@@ -160,8 +166,8 @@ the generation, a "fallback" strategy is used with Copilot IDE Plugin (GPT-5 min
 asks the LLM to generate a test class for the given production class or to convert a test class in a benchmark one.
 
 For this phase, there are two scripts:
-- **generate-ju-test.sh**: generate a junit test class given the info about the production class and the prompt variant to use;
-- **generate-jmh-bench.sh**: generate a jmh bench class given the info about the production class and the prompt variant to use;
+- **generate_ju-test.sh**: generate a junit test class given the info about the production class and the prompt variant to use;
+- **generate_jmh-bench.sh**: generate a jmh bench class given the info about the production class and the prompt variant to use;
 
 ### 4. Algorithms Execution
 The data are ready to be used as input for the chosen algorithms that are placed in **algorithms/** folder:
@@ -227,9 +233,33 @@ This phase can be automated by the **run_algorithms.sh** script located in the *
 the data processing phase.
 
 ### 6. Statistical Analysis
+In order to compare the algorithms output, they are prepared to a csv format, where each column represent the means of 
+all pareto fronts produced. This step is automated with the script **meanarr.py** located inside the **stats/** folder. 
+To execute this script run this command inside the folder:
+
+> python meanarr.py
+
+Once the data are prepared, statistical tests are executed to formally compare the algorithms:
+- **Shapiro-Wilk**: checks if all the columns follow the normal distribution. 
+Then other three test are executed to check if there are significant statistical difference between the possible pair of
+columns combination, which are the pairs to differ and to then quantify this difference. Depending on the obtained
+distribution, two different groups of three tests are executed:
+- **If Shapiro-Wilk finds a normal distribution for all the columns**: then Anova, Tukey, Cohen-d tests are executed;
+- **If Shapiro-Wilk does not find a normal distribution for all the columns**: then Kruskal-Wallis, Dunn, 
+Vargha-Delaney A tests are executed.
+
+This second step is automated with **stats.r** script. To execute this script run this command inside the folder:
+
+> Rscript stats.r
+ 
+All the statistical data are written inside the specific sheet file for the analyzed system and the analyzed metric.
+
+The entire phase can be automated with **run_stats.sh** script located in the **scripts/** folder.
+
+### 7. Obtained results
 All the previous phases are applied on two real systems. These systems have known performance issues and the goal is
-to apply test case selection and see if the selected tests can detect the issue and then the fix. The systems are analyzed
-on two states doing a checkout on some precise commits:
+to apply test case selection and see if the selected tests can detect the issue and then the fix. The systems are 
+analyzed on two states doing a checkout on some precise commits:
 - **Pre-fix** commit: At this commit, the performance issue is still present in the system; 
 - **Post-fix** commit: At this commit, the performance has just been fixed;
 
@@ -237,7 +267,7 @@ The chosen software are from the Apache Software Foundation:
 - **Avro**: the **avro** module is analyzed;
 - **Hive**: the **standalone-metastore-common** module is analyzed;
 
-The collected data are statistically compared after executing the algorithms in two different ways:
+The collected data have been compared after executing the algorithms, to evaluate two different approaches:
 - **"A monte" execution**: The algorithms are executed on the junit data, to obtain a subset of unit tests that they
 will be converted to micro benchmarks wrapping the junit tests, with [junit-to-jmh](https://github.com/alniniclas/junit-to-jmh);
 - **"A valle" execution**: The micro-benchmarks are directly generated from source code with LLMs. The algorithms are
