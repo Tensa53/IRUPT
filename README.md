@@ -221,16 +221,19 @@ The input files for this algorithm are:
   - **total_program_lines_all_programs.json**
 
 To execute this algorithm run these command inside the folder:
-> python select_qaoa.py ideal junit #ideal simulator (junit data)
+> python qaoa_tcs.py ideal junit #ideal simulator (junit data)
 > 
-> python select_qaoa.py ideal jmh #ideal simulator (jmh data)
+> python qaoa_tcs.py ideal jmh #ideal simulator (jmh data)
 >
-> python select_qaoa.py noise junit #noise simulator (junit data)
+> python qaoa_tcs.py noise junit #noise simulator (junit data)
 > 
-> python select_qaoa.py noise jmh #noise simulator (jmh data)
+> python qaoa_tcs.py noise jmh #noise simulator (jmh data)
 
 This phase can be automated by the **run_algorithms.sh** script located in the **scripts/** folder, that also automates
 the data processing phase.
+
+All the algorithms output are contained in the **results/** folder. The folder also contains Plotly-generated HTML
+visualization of clusters created by qaoa_tcs algorithm Note that GitHub language statistics excludes these HTML files.
 
 ### 6. Statistical Analysis
 In order to compare the algorithms output, they are prepared to a csv format, where each column represent the means of 
