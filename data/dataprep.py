@@ -506,7 +506,7 @@ def main():
                 dataprep.csv_from_coverage_matrix_and_time_matrix()
                 # extra methods for insight
                 # dataprep.search_covered_method_lines(method_lines_to_search_dict[program[0:program.find("_")]])
-                dataprep.filter_testcases_with_no_coverage()
+                # dataprep.filter_testcases_with_no_coverage()
             # method that merge all the json files program per program, for QAOA-TCS and Add-Greedy
             dataprep.merge()
     except IndexError:
