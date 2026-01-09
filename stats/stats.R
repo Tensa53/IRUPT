@@ -106,6 +106,15 @@ prepare_and_run_tests <- function(csv_file, filename, program, tool) {
   run_tests(filename, sdf, paste0("(",tool,")"), program, algorithm)
 }
 
+compute_means_sd_all <- function(df) {
+  for(name in names(df)){
+    me <- mean(df[, name])
+    sd <- sd(df[, name])
+    print(paste("Mean for", name, me, sep = " "))
+    print(paste("Standard dev. for", name, sd, sep = " "))
+  }
+}
+
 # load coverage csv
 means_coverage <- read.csv("means_coverage.csv", header=TRUE, stringsAsFactors=FALSE)
 # statistical tests for coverage data
@@ -121,3 +130,7 @@ prepare_and_run_tests(means_costs, "avro_costs_stats.ods", "avro", "ju")
 prepare_and_run_tests(means_costs, "avro_costs_stats.ods", "avro", "jmh")
 prepare_and_run_tests(means_costs, "hive_costs_stats.ods", "hive", "ju")
 prepare_and_run_tests(means_costs, "hive_costs_stats.ods", "hive", "jmh")
+
+# means and standard dev. for all the columns
+compute_means_sd_all(means_coverage)
+compute_means_sd_all(means_costs)
