@@ -10,12 +10,8 @@ cd ../divga
 matlab matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_junit.m');exit;"
 matlab matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_jmh.m');exit;"
 cd ../igdec_qaoa/
-python igdec_qaoa_tcs.py junit
-python igdec_qaoa_tcs.py jmh
 python noise_igdec_qaoa_tcs.py junit
 python noise_igdec_qaoa_tcs.py jmh
 cd ../qaoa_tcs/
-python qaoa_tcs.py ideal junit
-python qaoa_tcs.py ideal jmh
 python qaoa_tcs.py noise junit
 python qaoa_tcs.py noise jmh
