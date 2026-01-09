@@ -169,6 +169,8 @@ For this phase, there are two scripts:
 - **generate_ju-test.sh**: generate a junit test class given the info about the production class and the prompt variant to use;
 - **generate_jmh-bench.sh**: generate a jmh bench class given the info about the production class and the prompt variant to use;
 
+All the generated tests and benchmarks for the ablations evaluation are located inside the **ablations/** folder
+
 ### 4. Algorithms Execution
 The data are ready to be used as input for the chosen algorithms that are placed in **algorithms/** folder:
 
@@ -204,10 +206,6 @@ The input files for this algorithm are:
 - **\<ProgramName>.csv**.
 
 To execute this algorithm run these commands inside the folder:
-> python igdec_qaoa_tcs.py junit #ideal simulator (junit data)
-> 
-> python igdec_qaoa_tcs.py jmh #ideal simulator (jmh data)
-> 
 > python noise_igdec_qaoa_tcs.py junit #noise simulator (junit data)
 > 
 > python noise_igdec_qaoa_tcs.py jmh #noise simulator (jmh data)
@@ -221,10 +219,6 @@ The input files for this algorithm are:
   - **total_program_lines_all_programs.json**
 
 To execute this algorithm run these command inside the folder:
-> python qaoa_tcs.py ideal junit #ideal simulator (junit data)
-> 
-> python qaoa_tcs.py ideal jmh #ideal simulator (jmh data)
->
 > python qaoa_tcs.py noise junit #noise simulator (junit data)
 > 
 > python qaoa_tcs.py noise jmh #noise simulator (jmh data)
