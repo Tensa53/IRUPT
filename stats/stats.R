@@ -8,8 +8,6 @@ library(effsize)
 library(readODS)
 
 run_tests <- function(filename, df, tool, program, algorithm) {
-  # algorithm <- c("add.greedy", "divga", "igdeci", "igdecn", "qaoai", "qaoan")
-
   print(paste("Statistic tests for",program,"and",tool,"data",sep = " "))
 
   df_norm_stats <- data.frame(algorithm=c(), statistic=c(), p_value=c())
@@ -17,108 +15,32 @@ run_tests <- function(filename, df, tool, program, algorithm) {
   all_normal <- 0
 
   # SHAPIRO-WILK
-  tryCatch(
-    expr = {
-      df_norm_greedy <- shapiro.test(df[, algorithm[1]])
-      if(df_norm_greedy$p.value > 0.05){
-        all_normal <- all_normal + 1
+  for(i in length(algorithm)) {
+    tryCatch(
+      expr = {
+        df_norm <- shapiro.test(df[, algorithm[i]])
+        if(df_norm$p.value > 0.05){
+          all_normal <- all_normal + 1
+        }
+        print(df_norm)
+        df_norm_stats <- rbind(df_norm_stats, list(algorithm[1], df_norm$statistic, df_norm$p.value))
+      },
+      error = function (e) {
+        print(e)
+        df_norm_stats <<- rbind(df_norm_stats, list(algorithm[1], "-", "-"))
+        df <<- df[, -which(names(df) == algorithm[1])]
       }
-      print(df_norm_greedy)
-      df_norm_stats <- rbind(df_norm_stats, list(algorithm[1], df_norm_greedy$statistic, df_norm_greedy$p.value))
-    },
-    error = function (e) {
-      print(e)
-      df_norm_stats <<- rbind(df_norm_stats, list(algorithm[1], "-", "-"))
-      df <<- df[, -which(names(df) == algorithm[1])]
-    }
-  )
-  tryCatch(
-    expr = {
-      df_norm_divga <- shapiro.test(df[, algorithm[2]])
-      if(df_norm_divga$p.value > 0.05){
-        all_normal <- all_normal + 1
-      }
-      print(df_norm_divga)
-      df_norm_stats <- rbind(df_norm_stats, list(algorithm[2], df_norm_divga$statistic, df_norm_divga$p.value))
-    },
-    error = function (e) {
-      print(e)
-      df_norm_stats <<- rbind(df_norm_stats, list(algorithm[2], "-", "-"))
-      df <<- df[, -which(names(df) == algorithm[2])]
-    }
-  )
-  tryCatch(
-    expr = {
-      df_norm_igdeci <- shapiro.test(df[, algorithm[3]])
-      if(df_norm_igdeci$p.value > 0.05){
-        all_normal <- all_normal + 1
-      }
-      print(df_norm_igdeci)
-      df_norm_stats <- rbind(df_norm_stats, list(algorithm[3], df_norm_igdeci$statistic, df_norm_igdeci$p.value))
-    },
-    error = function (e) {
-      print(e)
-      df_norm_stats <<- rbind(df_norm_stats, list(algorithm[3], "-", "-"))
-      df <<- df[, -which(names(df) == algorithm[3])]
-    }
-  )
-  tryCatch(
-    expr = {
-      df_norm_igdecn <- shapiro.test(df[, algorithm[4]])
-      if(df_norm_igdecn$p.value > 0.05){
-        all_normal <- all_normal + 1
-      }
-      print(df_norm_igdecn)
-      df_norm_stats <- rbind(df_norm_stats, list(algorithm[4], df_norm_igdecn$statistic, df_norm_igdecn$p.value))
-    },
-    error = function (e) {
-      print(e)
-      df_norm_stats <<- rbind(df_norm_stats, list(algorithm[4], "-", "-"))
-      df <<- df[, -which(names(df) == algorithm[4])]
-    }
-  )
-  tryCatch(
-    expr = {
-      df_norm_qaoai <- shapiro.test(df[, algorithm[5]])
-      if(df_norm_qaoai$p.value > 0.05){
-        all_normal <- all_normal + 1
-      }
-      print(df_norm_qaoai)
-      df_norm_stats <- rbind(df_norm_stats, list(algorithm[5], df_norm_qaoai$statistic, df_norm_qaoai$p.value))
-    },
-    error = function (e) {
-      print(e)
-      df_norm_stats <<- rbind(df_norm_stats, list(algorithm[5], "-", "-"))
-      df <<- df[, -which(names(df) == algorithm[5])]
-    }
-  )
-  tryCatch(
-    expr = {
-      df_norm_qaoan <- shapiro.test(df[, algorithm[6]])
-      if(df_norm_qaoan$p.value > 0.05){
-        all_normal <- all_normal + 1
-      }
-      print(df_norm_qaoan)
-      df_norm_stats <- rbind(df_norm_stats, list(algorithm[6], df_norm_qaoan$statistic, df_norm_qaoan$p.value))
-    },
-    error = function (e) {
-      print(e)
-      df_norm_stats <<- rbind(df_norm_stats, list(algorithm[6], "-", "-"))
-      df <<- df[, -which(names(df) == algorithm[6])]
-    }
-  )
-
-  sheet_name <- paste(df_norm_greedy$method, tool, sep = " ")
-
+    )
+  }
+  sheet_name <- paste(df_norm$method, tool, sep = " ")
   names(df_norm_stats) <- c("algorithm", "statistics", "p_value")
-
   if(file.exists(filename)){
     write_ods(df_norm_stats, filename, sheet = sheet_name, append = TRUE)
   } else {
     write_ods(df_norm_stats, filename, sheet = sheet_name)
   }
 
-  if (all_normal == 6) {
+  if (all_normal == length(algorithm)) {
     print("All the groups follow a normal distribution")
     # ANOVA, TUKEY, COHEN-D
     print("To do ANOVA, TUKEY, COHEN-D")
@@ -174,11 +96,10 @@ run_tests <- function(filename, df, tool, program, algorithm) {
 }
 
 prepare_and_run_tests <- function(csv_file, filename, program, tool) {
-  algorithm <- c("add.greedy", "divga", "igdeci", "igdecn", "qaoai", "qaoan")
+  algorithm <- c("add.greedy", "divga", "igdecn", "qaoan")
 
   sdf <- csv_file[, c(paste0(program,"_",tool,"_",algorithm[1]), paste0(program,"_",tool,"_",algorithm[2]),
-                      paste0(program,"_",tool,"_",algorithm[3]), paste0(program,"_",tool,"_",algorithm[4]),
-                      paste0(program,"_",tool,"_",algorithm[5]), paste0(program,"_",tool,"_",algorithm[6]))]
+                      paste0(program,"_",tool,"_",algorithm[3]), paste0(program,"_",tool,"_",algorithm[4])) ]
 
   names(sdf) <- algorithm
 

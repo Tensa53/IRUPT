@@ -53,7 +53,7 @@ class MeanArrClass:
                     pareto_fronts_list.append(pareto_front_json[p])
                 i += 1
 
-        if algo == "igdeci" or algo == "igdecn":
+        if algo == "igdecn":
             i = 0
             for p in pareto_front_json:
                 key = "pareto_" + str(i)
@@ -62,7 +62,7 @@ class MeanArrClass:
                     pareto_fronts_list.append(pareto_front_json[p])
                 i += 1
 
-        if algo == "qaoai" or algo == "qaoan":
+        if algo == "qaoan":
             i = 0
             for p in pareto_front_json:
                 key = "pareto_front_" + str(i)
@@ -86,24 +86,12 @@ class MeanArrClass:
             pareto_divga_pre_jmh = f"../results/divga/jmh/{program}jmhpre_pareto_fronts_divga.json"
             pareto_divga_post_jmh = f"../results/divga/jmh/{program}jmhpost_pareto_fronts_divga.json"
             return pareto_divga_pre_ju, pareto_divga_post_ju, pareto_divga_pre_jmh, pareto_divga_post_jmh
-        elif algo == "igdeci":
-            pareto_igdeci_pre_ju = f"../results/igdec_qaoa/tcs/ideal/qaoa_1/{program}_pre-fix/junit/size_7/10/pareto_fronts.json"
-            pareto_igdeci_post_ju = f"../results/igdec_qaoa/tcs/ideal/qaoa_1/{program}_post-fix/junit/size_7/10/pareto_fronts.json"
-            pareto_igdeci_pre_jmh = f"../results/igdec_qaoa/tcs/ideal/qaoa_1/{program}_pre-fix/jmh/size_7/10/pareto_fronts.json"
-            pareto_igdeci_post_jmh = f"../results/igdec_qaoa/tcs/ideal/qaoa_1/{program}_post-fix/jmh/size_7/10/pareto_fronts.json"
-            return pareto_igdeci_pre_ju, pareto_igdeci_post_ju, pareto_igdeci_pre_jmh, pareto_igdeci_post_jmh
         elif algo == "igdecn":
             pareto_igdecn_pre_ju = f"../results/igdec_qaoa/tcs/noise/qaoa_1/{program}_pre-fix/junit/size_7/10/pareto_fronts.json"
             pareto_igdecn_post_ju = f"../results/igdec_qaoa/tcs/noise/qaoa_1/{program}_post-fix/junit/size_7/10/pareto_fronts.json"
             pareto_igdecn_pre_jmh = f"../results/igdec_qaoa/tcs/noise/qaoa_1/{program}_pre-fix/jmh/size_7/10/pareto_fronts.json"
             pareto_igdecn_post_jmh = f"../results/igdec_qaoa/tcs/noise/qaoa_1/{program}_post-fix/jmh/size_7/10/pareto_fronts.json"
             return pareto_igdecn_pre_ju, pareto_igdecn_post_ju, pareto_igdecn_pre_jmh, pareto_igdecn_post_jmh
-        elif algo == "qaoai":
-            pareto_qaoai_pre_ju = f"../results/qaoa_tcs/ideal/data/junit/{program}_pre-fix-data.json"
-            pareto_qaoai_post_ju = f"../results/qaoa_tcs/ideal/data/junit/{program}_post-fix-data.json"
-            pareto_qaoai_pre_jmh = f"../results/qaoa_tcs/ideal/data/jmh/{program}_pre-fix-data.json"
-            pareto_qaoai_post_jmh = f"../results/qaoa_tcs/ideal/data/jmh/{program}_post-fix-data.json"
-            return pareto_qaoai_pre_ju, pareto_qaoai_post_ju, pareto_qaoai_pre_jmh, pareto_qaoai_post_jmh
         elif algo == "qaoan":
             pareto_qaoan_pre_jmh = f"../results/qaoa_tcs/noise/data/jmh/{program}_pre-fix-data.json"
             pareto_qaoan_post_jmh = f"../results/qaoa_tcs/noise/data/jmh/{program}_post-fix-data.json"
@@ -143,13 +131,13 @@ class MeanArrClass:
 
         return mean_cov_par_list
 
-    def means_coverage_new(self, program):
+    def means_coverage(self, program):
         test_coverage_line_by_line_pre_ju = f"../data/processed/{program}_pre-fix/junit/test_coverage_line_by_line.json"
         test_coverage_line_by_line_post_ju = f"../data/processed/{program}_post-fix/junit/test_coverage_line_by_line.json"
         test_coverage_line_by_line_pre_jmh = f"../data/processed/{program}_pre-fix/jmh/test_coverage_line_by_line.json"
         test_coverage_line_by_line_post_jmh = f"../data/processed/{program}_post-fix/jmh/test_coverage_line_by_line.json"
 
-        algos = ["add-greedy", "divga", "igdeci", "igdecn", "qaoai", "qaoan"]
+        algos = ["add-greedy", "divga", "igdecn", "qaoan"]
         for algo in algos:
             pareto_pre_ju, pareto_post_ju, pareto_pre_jmh, pareto_post_jmh = self.__get_paretos_paths_by_algo_and_program(algo, program)
 
@@ -193,13 +181,13 @@ class MeanArrClass:
 
         return mean_cos_par_list
 
-    def means_costs_new(self, program):
+    def means_costs(self, program):
         test_cases_costs_pre_ju = f"../data/processed/{program}_pre-fix/junit/test_cases_costs.json"
         test_cases_costs_post_ju = f"../data/processed/{program}_post-fix/junit/test_cases_costs.json"
         test_cases_costs_pre_jmh = f"../data/processed/{program}_pre-fix/jmh/test_cases_costs.json"
         test_cases_costs_post_jmh = f"../data/processed/{program}_post-fix/jmh/test_cases_costs.json"
 
-        algos = ["add-greedy", "divga", "igdeci", "igdecn", "qaoai", "qaoan"]
+        algos = ["add-greedy", "divga", "igdecn", "qaoan"]
         for algo in algos:
             pareto_pre_ju, pareto_post_ju, pareto_pre_jmh, pareto_post_jmh = self.__get_paretos_paths_by_algo_and_program(algo, program)
 
@@ -240,8 +228,8 @@ def main():
 
     programs = ["avro", "hive"]
     for program in programs:
-        meanArrClass.means_coverage_new(program)
-        meanArrClass.means_costs_new(program)
+        meanArrClass.means_coverage(program)
+        meanArrClass.means_costs(program)
         meanArrClass.print_means_to_csv()
 
 if __name__ == "__main__":
