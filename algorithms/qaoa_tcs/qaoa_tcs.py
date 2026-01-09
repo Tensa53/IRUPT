@@ -389,84 +389,6 @@ class SelectQAOA:
 
         return pareto_front
 
-    def run_ideal_simulator(self):
-        sampling_noise_sampler = AerSampler()
-        sampling_noise_sampler.options.shots = None
-
-        for sir_program in self.sir_programs:
-            qaoa = QAOA(sampler=sampling_noise_sampler, optimizer=COBYLA(500),reps=self.sir_programs_rep_values[sir_program])
-            # the fronts will be saved into files
-            print("Executing Ideal Simulator for Program: " + sir_program)
-            dir_path = f"../../results/qaoa_tcs/ideal/data/{self.test_tool}"
-            if not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-            file_path = dir_path + "/" + sir_program + "-data.json"
-            json_data = {}
-            qpu_run_times = []
-            pareto_fronts_building_times = []
-            experiments = 10
-
-            for i in range (experiments):
-                final_selected_tests = []
-                cluster_dict_index = 0
-                for qubo in self.qubos_dictionary[sir_program]:
-                    print("QUBO Problem: " + str(qubo) + "\n Cluster Number: " + str(cluster_dict_index))
-                    print("Cluster's Test Cases: " + str(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index]))
-                    # for each iteration get the result
-                    operator, offset = qubo.to_ising()
-                    print("Linear QUBO: " + str(qubo))
-                    # for each iteration get the result
-                    s = time.time()
-                    qaoa_result = qaoa.compute_minimum_eigenvalue(operator)
-                    e = time.time()
-                    # print("QAOA Result: " + str(qaoa_result))
-                    qpu_run_times.append((e - s) * 1000)
-
-                    eigenstate = qaoa_result.eigenstate
-                    most_likely = max(eigenstate.items(), key=lambda x: x[1])[0]
-
-                    # Convert to bitstring format
-                    if isinstance(most_likely, int):
-                        n = qubo.get_num_binary_vars()
-                        bitstring = [int(b) for b in format(most_likely, f'0{n}b')[::-1]]
-                    elif isinstance(most_likely, str):
-                        bitstring = [int(b) for b in most_likely[::-1]]
-                    else:
-                        raise ValueError(f"Unsupported eigenstate key type: {type(most_likely)}")
-
-                    indexes_selected_tests = [index for index, value in enumerate(bitstring) if value == 1]
-                    print("Indexes of selected tests to convert. " + str(indexes_selected_tests))
-                    selected_tests = []
-                    for index in indexes_selected_tests:
-                        selected_tests.append(list(self.clusters_dictionary[sir_program].values())[cluster_dict_index][index])
-                    print("Selected tests: " + str(selected_tests))
-                    print("Experiment Number: " + str(i))
-                    cluster_dict_index += 1
-                    for selected_test in selected_tests:
-                        if selected_test not in final_selected_tests:
-                            final_selected_tests.append(selected_test)
-
-                # now we have to build the pareto front
-                print("Final Selected Test Cases: " + str(final_selected_tests))
-                print("Length of the final list of selected test cases: " + str(len(final_selected_tests)))
-                start = time.time()
-                pareto_front = self.build_pareto_front(sir_program, final_selected_tests)
-                end = time.time()
-                json_data["pareto_front_" + str(i)] = pareto_front
-                pareto_front_building_time = (end - start) * 1000
-                pareto_fronts_building_times.append(pareto_front_building_time)
-
-            # compute the average time needed for the construction of a pareto frontier and run time
-            mean_qpu_run_time = statistics.mean(qpu_run_times)
-            mean_pareto_fronts_building_time = statistics.mean(pareto_fronts_building_times)
-            json_data["mean_qpu_run_time(ms)"] = mean_qpu_run_time
-            json_data["stdev_qpu_run_time(ms)"] = statistics.stdev(qpu_run_times)
-            json_data["all_qpu_run_times(ms)"] = qpu_run_times
-            json_data["mean_pareto_fronts_building_time(ms)"] = mean_pareto_fronts_building_time
-
-            with open(file_path, "w") as file:
-                json.dump(json_data, file)
-
     def run_noise_simulator(self):
         noise_model = NoiseModel.from_backend(FakeBrisbane())
         fake_sampler = AerSampler(backend_options={'noise_model': noise_model})
@@ -564,14 +486,11 @@ def main():
     selectQAOA.process_clusters()
     selectQAOA.specify_penalties()
     selectQAOA.save_QUBO_in_dict()
-    if mode == "ideal":
-        # run the ideal simulator
-        selectQAOA.run_ideal_simulator()
-    elif mode == "noise":
+    if mode == "noise":
         # run the noise simulator
         selectQAOA.run_noise_simulator()
     else:
-        print("Unsupported mode: " + mode + ". Available modes: ideal, noise")
+        print("Unsupported mode: " + mode + ". Available modes: noise")
         exit(1)
 
 if __name__ == '__main__':
