@@ -28,7 +28,6 @@ run_tests <- function(filename, df, tool, program, algorithm) {
       error = function (e) {
         print(e)
         df_norm_stats <<- rbind(df_norm_stats, list(algo, "-", "-"))
-        df <<- df[, -which(names(df) == algo)]
       }
     )
   }
@@ -75,17 +74,26 @@ run_tests <- function(filename, df, tool, program, algorithm) {
         diff <- VD.A(df[, el[1]], df[, el[2]])
         print(diff)
         print(diff$estimate)
-        if (diff$estimate < 0.5){
-          vargha_df <- rbind(vargha_df, list(comp, diff$estimate, diff$magnitude))
-          print("Reversing Varga and Delaney A comparison due to zero estimate")
-          comprev <- paste(el[2], el[1], sep = " - ")
-          print(comprev)
-          diffrev <- VD.A(df[, el[2]], df[, el[1]])
-          print(diffrev)
-          vargha_df <- rbind(vargha_df, list(comprev, diffrev$estimate, diffrev$magnitude))
-        } else {
-          vargha_df <- rbind(vargha_df, list(comp, diff$estimate, diff$magnitude))
-        }
+
+        vargha_df <- rbind(vargha_df, list(comp, diff$estimate, diff$magnitude))
+        print("Reversing Varga and Delaney A comparison")
+        comprev <- paste(el[2], el[1], sep = " - ")
+        print(comprev)
+        diffrev <- VD.A(df[, el[2]], df[, el[1]])
+        print(diffrev)
+        vargha_df <- rbind(vargha_df, list(comprev, diffrev$estimate, diffrev$magnitude))
+
+        # if (diff$estimate < 0.5){
+        #   vargha_df <- rbind(vargha_df, list(comp, diff$estimate, diff$magnitude))
+        #   print("Reversing Varga and Delaney A comparison due to zero estimate")
+        #   comprev <- paste(el[2], el[1], sep = " - ")
+        #   print(comprev)
+        #   diffrev <- VD.A(df[, el[2]], df[, el[1]])
+        #   print(diffrev)
+        #   vargha_df <- rbind(vargha_df, list(comprev, diffrev$estimate, diffrev$magnitude))
+        # } else {
+        #   vargha_df <- rbind(vargha_df, list(comp, diff$estimate, diff$magnitude))
+        # }
       }
     }
     names(vargha_df) <- c("comparison", "estimate", "magnitude")
