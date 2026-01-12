@@ -15,20 +15,20 @@ run_tests <- function(filename, df, tool, program, algorithm) {
   all_normal <- 0
 
   # SHAPIRO-WILK
-  for(i in length(algorithm)) {
+  for(algo in algorithm) {
     tryCatch(
       expr = {
-        df_norm <- shapiro.test(df[, algorithm[i]])
+        df_norm <- shapiro.test(df[, algo])
         if(df_norm$p.value > 0.05){
           all_normal <- all_normal + 1
         }
         print(df_norm)
-        df_norm_stats <- rbind(df_norm_stats, list(algorithm[1], df_norm$statistic, df_norm$p.value))
+        df_norm_stats <- rbind(df_norm_stats, list(algo, df_norm$statistic, df_norm$p.value))
       },
       error = function (e) {
         print(e)
-        df_norm_stats <<- rbind(df_norm_stats, list(algorithm[1], "-", "-"))
-        df <<- df[, -which(names(df) == algorithm[1])]
+        df_norm_stats <<- rbind(df_norm_stats, list(algo, "-", "-"))
+        df <<- df[, -which(names(df) == algo)]
       }
     )
   }
