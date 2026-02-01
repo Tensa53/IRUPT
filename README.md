@@ -1,6 +1,6 @@
-# ERUPT
+# IRUPT
 
-**ERUPT** (**E**xploring the **R**ole of **U**nit tests for **P**erformance regression **T**esting optimization)
+**IRUPT** (**I**nvestigating the **R**ole of **U**nit tests for **P**erformance regression **T**esting optimization)
 is a study that analyzes how unit tests metrics (statement coverage and execution times) can support the optimization 
 of a regression testing campaign in the context of Performance Testing.
 
@@ -13,7 +13,7 @@ For the Java classes, there is a configuration file inside the **java/** folder,
 Starting from the initial configuration file, it has to be adapted to the one of the analyzed software. 
 A reference implementation for a correctly configured project is available at [MavenProjectJ4](https://github.com/Tensa53/MavenProjectJ4). 
 
-For the Python modules and algorithms, there is a requirements.txt inside the root of this repository.
+For the Python modules and algorithms, there is a requirements.txt file inside the root of this repository.
 
 DIV-GA algorithm requires MATLAB R2025a and Global Optimization Toolbox.
 
@@ -24,14 +24,14 @@ Some software will be chosen to retrieve the data and compute the metrics. The *
 necessary code, organized in packages, that is necessary to add to the software to analyze it and collect the data:
 - **benchmarks/**: contains all the micro-benchmarks created;
   - **profiler/**: contains the classes that collect data from micro-benchmarks;
-    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
+    - **JaCoCoSplit.java**: writes the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
 micro-benchmark method;
-    - **JaCoCoProfiler.java**: intercept the end of an iteration of a micro-benchmark method to call JaCoCoSplitter;
+    - **JaCoCoProfiler.java**: intercepts the end of an iteration of a micro-benchmark method to call JaCoCoSplit;
 - **test/**: contains all the unit-test created;
   - **listener/**: contains the classes that collect data from unit-tests;
-    - **JaCoCoSplit.java**: write the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
+    - **JaCoCoSplit.java**: writes the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
 unit-test method;
-    - **JaCoCoListener.java**: intercept the end of an execution of a unit-test method to call JaCoCoSplitter;
+    - **JaCoCoListener.java**: intercepts the end of an execution of a unit-test method to call JaCoCoSplit;
 
 Doing a complete build (**mvn clean install**) of the system during this phase, gives in output the following files
 for the analyzed software and placed in sub folders of the build target directory:
@@ -253,7 +253,7 @@ All the statistical data are written inside the specific sheet file for the anal
 
 The entire phase can be automated with **run_stats.sh** script located in the **scripts/** folder.
 
-### 7. Obtained results
+### 7. Research goal achieved
 All the previous phases are applied on two real systems. These systems have known performance issues and the goal is
 to apply test case selection and see if the selected tests can detect the issue and then the fix. The systems are 
 analyzed on two states doing a checkout on some precise commits:
@@ -265,7 +265,11 @@ The chosen software are from the Apache Software Foundation:
 - **Hive**: the **standalone-metastore-common** module is analyzed;
 
 The collected data have been compared after executing the algorithms, to evaluate two different approaches:
-- **"A monte" execution**: The algorithms are executed on the junit data, to obtain a subset of unit tests that they
+- **Upstream**: The algorithms are executed on the junit data, to obtain a subset of unit tests that they
 will be converted to micro benchmarks wrapping the junit tests, with [junit-to-jmh](https://github.com/alniniclas/junit-to-jmh);
-- **"A valle" execution**: The micro-benchmarks are directly generated from source code with LLMs. The algorithms are
+- **Downstream**: The micro-benchmarks are directly generated from source code with LLMs. The algorithms are
 executed on the jmh data, to obtain a subset of micro-benchmarks.
+
+The statistical analysis showed how the downstream approach with DIV-GA is the one able to select a
+subset of test cases with the highest coverage, while the upstream approach with quantum algorithms is the one able to
+select a subset of test cases with the lowest execution time.
