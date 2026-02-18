@@ -7,14 +7,16 @@ of a regression testing campaign in the context of Performance Testing.
 ## Methodology Overview
 This study compares two method approaches for Test Case Selection on micro-benchmarks:
 ![upstream](https://github.com/Tensa53/IRUPT/blob/master/img/upstream.svg "upstream")
-- **Upstream Method Approach**: aims to reuse the original functional test suites,
+
+**Upstream Method Approach**: aims to reuse the original functional test suites,
 such as unit-tests classes built with JUnit, to select a subset of it and create a new
 micro-benchmarks suite able to cover the lines of code affected by performance
 regressions;
 
 
 ![downstream](https://github.com/Tensa53/IRUPT/blob/master/img/downstream.svg "downstream")
-- **Downstream Approach**: aims to firstly create the micro-benchmarks suite, such as JMH classes
+
+**Downstream Approach**: aims to firstly create the micro-benchmarks suite, such as JMH classes
 and then select a subset of it able to cover the lines of code affected by performance
 regressions.
 
