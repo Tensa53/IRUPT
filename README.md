@@ -4,6 +4,20 @@
 is a study that analyzes how unit tests metrics (statement coverage and execution times) can support the optimization 
 of a regression testing campaign in the context of Performance Testing.
 
+## Methodology Overview
+This study compares two method approaches for Test Case Selection on micro-benchmarks:
+![upstream](https://github.com/Tensa53/BloatWeak/blob/master/img/upstream.svg "upstream")
+- **Upstream Method Approach**: aims to reuse the original functional test suites,
+such as unit-tests classes built with JUnit, to select a subset of it and create a new
+micro-benchmarks suite able to cover the lines of code affected by performance
+regressions;
+
+
+![downstream](https://github.com/Tensa53/BloatWeak/blob/master/img/downstream.svg "downstream")
+- **Downstream Approach**: aims to firstly create the micro-benchmarks suite, such as JMH classes
+and then select a subset of it able to cover the lines of code affected by performance
+regressions.
+
 ## Methodology Workflow
 
 ### 0. Configuration Setup
@@ -253,7 +267,7 @@ All the statistical data are written inside the specific sheet file for the anal
 
 The entire phase can be automated with **run_stats.sh** script located in the **scripts/** folder.
 
-### 7. Research goal achieved
+### 7. Analyzed Systems
 All the previous phases are applied on two real systems. These systems have known performance issues and the goal is
 to apply test case selection and see if the selected tests can detect the issue and then the fix. The systems are 
 analyzed on two states doing a checkout on some precise commits:
@@ -264,12 +278,4 @@ The chosen software are from the Apache Software Foundation:
 - **Avro**: the **avro** module is analyzed;
 - **Hive**: the **standalone-metastore-common** module is analyzed;
 
-The collected data have been compared after executing the algorithms, to evaluate two different approaches:
-- **Upstream**: The algorithms are executed on the junit data, to obtain a subset of unit tests that they
-will be converted to micro benchmarks wrapping the junit tests, with [junit-to-jmh](https://github.com/alniniclas/junit-to-jmh);
-- **Downstream**: The micro-benchmarks are directly generated from source code with LLMs. The algorithms are
-executed on the jmh data, to obtain a subset of micro-benchmarks.
-
-The statistical analysis showed how the downstream approach with DIV-GA is the one able to select a
-subset of test cases with the highest coverage, while the upstream approach with quantum algorithms is the one able to
-select a subset of test cases with the lowest execution time.
+### 8. Obtained Results
