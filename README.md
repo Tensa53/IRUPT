@@ -281,3 +281,16 @@ The chosen software are from the Apache Software Foundation:
 - **Hive**: the **standalone-metastore-common** module is analyzed;
 
 ### 8. Obtained Results
+This study answers two Research Question:
+> RQ1: Which is the best algorithm for selecting a subset of micro-benchmarks?
+
+For the first Research Question, the results showed how the downstream approach with DIV-GA is the most effective one,
+selecting solutions with the highest statement coverage. The upstream approach with Quantum Algorithms is the most
+efficient one, selecting solutions with the lowest execution times.
+
+> RQ2: Which is the best method approach for creating and selecting micro-benchmarks?
+
+For the Second Research Question, based on the well balanced results obtained with DIV-GA and
+how easy it is to use, in combination with the reliable measurements that can be
+done through micro-benchmarking thanks to JMH, the downstream approach with
+DIV-GA is the best configuration compared to all the others analyzed.
