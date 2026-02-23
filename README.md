@@ -4,23 +4,42 @@
 is a study that analyzes how unit tests metrics (statement coverage and execution times) can support the optimization 
 of a regression testing campaign in the context of Performance Testing.
 
-## Methodology Overview
+## Method Overview
 This study compares two method approaches for Test Case Selection on micro-benchmarks:
+#### Upstream Method Approach
+
 ![upstream](https://github.com/Tensa53/IRUPT/blob/master/img/upstream.svg "upstream")
 
-**Upstream Method Approach**: aims to reuse the original functional test suites,
+Aims to reuse the original functional test suites,
 such as unit-tests classes built with JUnit, to select a subset of it and create a new
 micro-benchmarks suite able to cover the lines of code affected by performance
 regressions;
 
+#### Downstream Method Approach
 
 ![downstream](https://github.com/Tensa53/IRUPT/blob/master/img/downstream.svg "downstream")
 
-**Downstream Approach**: aims to firstly create the micro-benchmarks suite, such as JMH classes
+aims to firstly create the micro-benchmarks suite, such as JMH classes
 and then select a subset of it able to cover the lines of code affected by performance
 regressions.
 
-## Methodology Workflow
+#### Obtained Results
+This study answers two Research Question:
+> RQ1: Which is the best algorithm for selecting a subset of micro-benchmarks?
+
+For the first Research Question, the evaluations are done on the algorithms applied for each of the two approaches. 
+The results showed how the downstream approach with DIV-GA is the most effective one,
+selecting solutions with the highest statement coverage. The upstream approach with Quantum Algorithms is the most
+efficient one, selecting solutions with the lowest execution times.
+
+> RQ2: Which is the best method approach for creating and selecting micro-benchmarks?
+
+For the Second Research Question, the evaluations are done on the different configurations of used algorithm and applied 
+approach. Based on the well balanced results obtained with DIV-GA and how easy it is to use, in combination 
+with the reliable measurements that can be done through micro-benchmarking thanks to JMH, the downstream approach with
+DIV-GA is the best configuration compared to all the others analyzed.
+
+## Method Workflow
 
 ### 0. Configuration Setup
 In order to execute the next phases of the workflow, a setup of the execution environment is necessary. 
@@ -279,18 +298,3 @@ analyzed on two states doing a checkout on some precise commits:
 The chosen software are from the Apache Software Foundation:
 - **Avro**: the **avro** module is analyzed;
 - **Hive**: the **standalone-metastore-common** module is analyzed;
-
-### 8. Obtained Results
-This study answers two Research Question:
-> RQ1: Which is the best algorithm for selecting a subset of micro-benchmarks?
-
-For the first Research Question, the results showed how the downstream approach with DIV-GA is the most effective one,
-selecting solutions with the highest statement coverage. The upstream approach with Quantum Algorithms is the most
-efficient one, selecting solutions with the lowest execution times.
-
-> RQ2: Which is the best method approach for creating and selecting micro-benchmarks?
-
-For the Second Research Question, based on the well balanced results obtained with DIV-GA and
-how easy it is to use, in combination with the reliable measurements that can be
-done through micro-benchmarking thanks to JMH, the downstream approach with
-DIV-GA is the best configuration compared to all the others analyzed.
