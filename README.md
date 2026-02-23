@@ -19,7 +19,7 @@ regressions;
 
 ![downstream](https://github.com/Tensa53/IRUPT/blob/master/img/downstream.svg "downstream")
 
-aims to firstly create the micro-benchmarks suite, such as JMH classes
+Aims to firstly create the micro-benchmarks suite, such as JMH classes
 and then select a subset of it able to cover the lines of code affected by performance
 regressions.
 
