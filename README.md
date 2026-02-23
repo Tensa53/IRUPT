@@ -35,9 +35,9 @@ efficient one, selecting solutions with the lowest execution times.
 > RQ2: Which is the best method approach for creating and selecting micro-benchmarks?
 
 For the Second Research Question, the evaluations are done on the different configurations of used algorithm and applied 
-approach. Based on the well balanced results obtained with DIV-GA and how easy it is to use, in combination 
-with the reliable measurements that can be done through micro-benchmarking thanks to JMH, the downstream approach with
-DIV-GA is the best configuration compared to all the others analyzed.
+approach. Based on the well balanced results obtained with DIV-GA and how easy it is to use this algorithm, in 
+combination with the reliable measurements that can be done through micro-benchmarking thanks to JMH, the downstream 
+approach with DIV-GA is the best configuration compared to all the others analyzed.
 
 ## Method Workflow
 
