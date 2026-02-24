@@ -1,6 +1,6 @@
 # IRUPT
 
-**IRUPT** (**I**nvestigating the **R**ole of **U**nit tests for **P**erformance regression **T**esting optimization)
+**IRUPT** (**I**nvestigating the **R**ole of **U**nit Tests for **P**erformance Regression **T**esting Optimization)
 is a study that analyzes how unit tests metrics (statement coverage and execution times) can support the optimization 
 of a regression testing campaign in the context of Performance Testing.
 
@@ -12,8 +12,7 @@ This study compares two method approaches for Test Case Selection on micro-bench
 
 Aims to reuse the original functional test suites,
 such as unit-tests classes built with JUnit, to select a subset of it and create a new
-micro-benchmarks suite able to cover the lines of code affected by performance
-regressions;
+micro-benchmarks suite able to cover the lines of code affected by performance regressions;
 
 #### Downstream Method Approach
 
@@ -55,8 +54,8 @@ DIV-GA algorithm requires MATLAB R2025a and Global Optimization Toolbox.
 For the statistical analysis phase, an R installation is required.
 
 ### 1. Data Collection
-Some software will be chosen to retrieve the data and compute the metrics. The **java/** folder contains all the
-necessary code, organized in packages, that is necessary to add to the software to analyze it and collect the data:
+Some software systems will be chosen to retrieve the data and compute the metrics. The **java/** folder contains all the
+necessary code, organized in packages, that is necessary to add to the system for analyzing it and collect the data:
 - **benchmarks/**: contains all the micro-benchmarks created;
   - **profiler/**: contains the classes that collect data from micro-benchmarks;
     - **JaCoCoSplit.java**: writes the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
@@ -69,7 +68,7 @@ unit-test method;
     - **JaCoCoListener.java**: intercepts the end of an execution of a unit-test method to call JaCoCoSplit;
 
 Doing a complete build (**mvn clean install**) of the system during this phase, gives in output the following files
-for the analyzed software and placed in sub folders of the build target directory:
+organized in sub folders of the build target directory:
 - **target/**:
   - **jacoco-junit/**: contains the .exec file, for each single unit-test method overall coverage;
   - **surefire-reports/**: contains the .xml file, for each single unit-test method execution time.
@@ -100,16 +99,16 @@ This phase is supported by the scripts located in the **scripts/** folder:
 - **run_benchs_for_times.sh**: run the micro-benchmarks to collect the execution times data;
 - **restore_system.sh**: restore the services previously stopped.
 
-Before executing these script, they must be copied inside the root folder of the software to be analyzed. These scripts
+Before executing these script, they must be copied inside the root folder of the system to be analyzed. These scripts
 are intended to be executed after each test run for the coverage (after the build of the system and after executing the 
 **run_benchs_for_coverage.sh** script)
 
 ### 2. Data Preparing
 Once obtained the initial data, the data are prepared to the correct format used by the algorithms that optimize 
-the selection. In this phase, 'Program' is used as a synonymum for 'Software', and test case is a generic name used
-to identify both unit-test and micro-benchmark method. In order to correctly prepare data
-the raw data needs to be placed inside the **data/raw/** folder. Due to the heavy size of all the reports file, this
-folder is not uploaded on this repo. But you can reconstruct it for your executions, following the directory structure
+the selection. In this phase, 'Program' is used as a synonymum for 'Software System', and test case is a generic name 
+used to identify both unit-test and micro-benchmark method. In order to correctly prepare data the raw data needs to
+be placed inside the **data/raw/** folder. Due to the heavy size of all the reports file, this folder is not uploaded 
+on this repo. But you can reconstruct it for your executions, following the directory structure
 described here:
 - **ProgramName/**:
   - **junit/**:
@@ -182,13 +181,12 @@ these commands inside the folder:
 > python dataprep.py jmh #to prepare data from jmh raw data
 
 ### 3. Generation of tests and benchmarks
-The software to analyze can miss some of the tests and benchmarks classes that are necessary to correctly find the 
+The systems to be analyzed can miss some of the tests and benchmarks classes that are necessary to correctly find the 
 issues. Not having a real knowledge of the system is a threat to manually writing tests and benchmarks. For these reasons
 LLMs are being used to complete the suites of tests and benchmarks. A prompt engineering process has been designed for
 this phase, involving the generation of an "ideal prompt" with meta-prompting techniques. Two main prompt are created
-throught their respecitve conversations with Copilot Web (Claude Sonnet 4.5), one for [junit classes](https://github.com/copilot/share/482153b0-4ae4-88e3-b011-8e4b207549ba) 
-and one for [jmh classes](https://github.com/copilot/share/42084032-03e0-88c5-a812-9c02003500b9). The obtained prompt
-are then involved in an ablation phase, to pick the best variant of the prompt:
+throught their respecitve conversations with Copilot Web (Claude Sonnet 4.5), one for junit classes and one for jmh 
+classes. The obtained prompt are then involved in an ablation phase, to pick the best variant of the prompt:
 - **Ablation 0**: The prompt includes all the chosen prompt patterns (persona and few-shot);
 - **Ablation 1**: The prompt keeps the persona pattern but removes few-shot;
 - **Ablation 2**: The prompt removes the persona pattern but keeps few-shot;
