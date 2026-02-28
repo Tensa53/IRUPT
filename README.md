@@ -5,37 +5,37 @@ is a study that analyzes how unit tests metrics (statement coverage and executio
 of a regression testing campaign in the context of Performance Testing.
 
 ## Method Overview
-This study compares two method approaches for Test Case Selection on micro-benchmarks:
+This study compares two method approaches for Test Case Selection on microbenchmarks:
 #### Upstream Method Approach
 
 ![upstream](https://github.com/Tensa53/IRUPT/blob/master/img/upstream.svg "upstream")
 
 Aims to reuse the original functional test suites,
-such as unit-tests classes built with JUnit, to select a subset of it and create a new
-micro-benchmarks suite able to cover the lines of code affected by performance regressions;
+such as unit tests classes built with JUnit, to select a subset of it and create a new
+microbenchmarks suite able to cover the lines of code affected by performance regressions;
 
 #### Downstream Method Approach
 
 ![downstream](https://github.com/Tensa53/IRUPT/blob/master/img/downstream.svg "downstream")
 
-Aims to firstly create the micro-benchmarks suite, such as JMH classes
+Aims to firstly create the microbenchmarks suite, such as JMH classes
 and then select a subset of it able to cover the lines of code affected by performance
 regressions.
 
 #### Obtained Results
 This study answers two Research Question:
-> RQ1: Which is the best algorithm for selecting a subset of micro-benchmarks?
+> RQ1: Which is the best algorithm for selecting a subset of microbenchmarks?
 
 For the first Research Question, the evaluations are done on the algorithms applied for each of the two approaches. 
 The results showed how the downstream approach with DIV-GA is the most effective one,
 selecting solutions with the highest statement coverage. The upstream approach with Quantum Algorithms is the most
 efficient one, selecting solutions with the lowest execution times.
 
-> RQ2: Which is the best method approach for creating and selecting micro-benchmarks?
+> RQ2: Which is the best method approach for creating and selecting microbenchmarks?
 
 For the Second Research Question, the evaluations are done on the different configurations of used algorithm and applied 
 approach. Based on the well balanced results obtained with DIV-GA and how easy it is to use this algorithm, in 
-combination with the reliable measurements that can be done through micro-benchmarking thanks to JMH, the downstream 
+combination with the reliable measurements that can be done through microbenchmarking thanks to JMH, the downstream 
 approach with DIV-GA is the best configuration compared to all the others analyzed.
 
 ## Method Workflow
@@ -56,28 +56,28 @@ For the statistical analysis phase, an R installation is required.
 ### 1. Data Collection
 Some software systems will be chosen to retrieve the data and compute the metrics. The **java/** folder contains all the
 necessary code, organized in packages, that is necessary to add to the system for analyzing it and collect the data:
-- **benchmarks/**: contains all the micro-benchmarks created;
-  - **profiler/**: contains the classes that collect data from micro-benchmarks;
+- **benchmarks/**: contains all the microbenchmarks created;
+  - **profiler/**: contains the classes that collect data from microbenchmarks;
     - **JaCoCoSplit.java**: writes the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
-micro-benchmark method;
-    - **JaCoCoProfiler.java**: intercepts the end of an iteration of a micro-benchmark method to call JaCoCoSplit;
-- **test/**: contains all the unit-test created;
-  - **listener/**: contains the classes that collect data from unit-tests;
+microbenchmark method;
+    - **JaCoCoProfiler.java**: intercepts the end of an iteration of a microbenchmark method to call JaCoCoSplit;
+- **test/**: contains all the unit test created;
+  - **listener/**: contains the classes that collect data from unit tests;
     - **JaCoCoSplit.java**: writes the execution data of JaCoCo from the JMX Agent Stream to an .exec file, for each 
-unit-test method;
-    - **JaCoCoListener.java**: intercepts the end of an execution of a unit-test method to call JaCoCoSplit;
+unit test method;
+    - **JaCoCoListener.java**: intercepts the end of an execution of a unit test method to call JaCoCoSplit;
 
 Doing a complete build (**mvn clean install**) of the system during this phase, gives in output the following files
 organized in sub folders of the build target directory:
 - **target/**:
-  - **jacoco-junit/**: contains the .exec file, for each single unit-test method overall coverage;
-  - **surefire-reports/**: contains the .xml file, for each single unit-test method execution time.
+  - **jacoco-JUnit/**: contains the .exec file, for each single unit test method overall coverage;
+  - **surefire-reports/**: contains the .xml file, for each single unit test method execution time.
 
-After the build is completed, the micro-benchmarks can be executed through the shaded jar created in the target 
-directory. In order to collect all the data from the micro-benchmarks, two executions are necessary:
-1. **Execution for coverage data**: the micro-benchmarks are executed with a minimal configuration, to collect the
+After the build is completed, the microbenchmarks can be executed through the shaded jar created in the target 
+directory. In order to collect all the data from the microbenchmarks, two executions are necessary:
+1. **Execution for coverage data**: the microbenchmarks are executed with a minimal configuration, to collect the
 coverage data;
-2. **Execution for execution times**: the micro-benchmarks are executed with a complete configuration, to collect the
+2. **Execution for execution times**: the microbenchmarks are executed with a complete configuration, to collect the
 execution times.
 
 For these two executions, there are scripts described below.
@@ -87,16 +87,16 @@ To obtain the total number of lines of code to analyze, [cloc](https://github.co
 
 The execution of these two scripts gives in output the respective files for the analyzed software:
 - **target/**:
-  - **jacoco-jmh/**: contains the .exec file, for each single micro-benchmark method overall coverage;
-  - **time-reports/**: contains the .json file, for each single micro-benchmark method execution time.
+  - **jacoco-JMH/**: contains the .exec file, for each single microbenchmark method overall coverage;
+  - **time-reports/**: contains the .json file, for each single microbenchmark method execution time.
 
 This phase is supported by the scripts located in the **scripts/** folder:
-- **generate_reports.sh**: generates a JaCoCo report for each single .exec file of the unit-test or micro-benchmark methods;
+- **generate_reports.sh**: generates a JaCoCo report for each single .exec file of the unit test or microbenchmark methods;
 - **merge_execs_reports.sh**: generate an overall JaCoCo report, merging all the .exec files;
 - **custom_jar.sh**: creates a custom jar, in case the shade plugin did not add BenchmarkList and CompilerHints file;
-- **run_benchs_for_coverage.sh**: run the micro-benchmarks to collect coverage data;
-- **prepare_system.sh**: stops unnecessary services of the operating system, to run micro-benchmarks in best conditions;
-- **run_benchs_for_times.sh**: run the micro-benchmarks to collect the execution times data;
+- **run_benchs_for_coverage.sh**: run the microbenchmarks to collect coverage data;
+- **prepare_system.sh**: stops unnecessary services of the operating system, to run microbenchmarks in best conditions;
+- **run_benchs_for_times.sh**: run the microbenchmarks to collect the execution times data;
 - **restore_system.sh**: restore the services previously stopped.
 
 Before executing these script, they must be copied inside the root folder of the system to be analyzed. These scripts
@@ -106,18 +106,18 @@ are intended to be executed after each test run for the coverage (after the buil
 ### 2. Data Preparing
 Once obtained the initial data, the data are prepared to the correct format used by the algorithms that optimize 
 the selection. In this phase, 'Program' is used as a synonymum for 'Software System', and test case is a generic name 
-used to identify both unit-test and micro-benchmark method. In order to correctly prepare data the raw data needs to
+used to identify both unit test and microbenchmark method. In order to correctly prepare data the raw data needs to
 be placed inside the **data/raw/** folder. Due to the heavy size of all the reports file, this folder is not uploaded 
 on this repo. But you can reconstruct it for your executions, following the directory structure
 described here:
 - **ProgramName/**:
-  - **junit/**:
-    - **jacoco-junit-xml/**: contains the .xml report for every unit-test method coverage data;
-    - **surefire-reports/**: contains the .xml report for every unit-test method execution time;
+  - **JUnit/**:
+    - **jacoco-JUnit-xml/**: contains the .xml report for every unit test method coverage data;
+    - **surefire-reports/**: contains the .xml report for every unit test method execution time;
     - **total-lines.json**: contains the number of source code line for the analyzed software component.
-  - **jmh/**:
-    - **jacoco-jmh-xml/**: contains the .xml report for every micro-benchmark method coverage data;
-    - **time-reports/**: contains the .xml report for every micro-benchmark method execution time;
+  - **JMH/**:
+    - **jacoco-JMH-xml/**: contains the .xml report for every microbenchmark method coverage data;
+    - **time-reports/**: contains the .xml report for every microbenchmark method execution time;
     - **total-lines.json**: contains the number of source code line for the analyzed software component.
 
 The **dataprep.py** module contains different functions to prepare the data:
@@ -176,16 +176,16 @@ The json files are merged together for all programs and placed in **data/merged/
 
 This phase can be automated by the **dataprep.py** script located in the **data/** folder. To execute this script run
 these commands inside the folder:
-> python dataprep.py junit #to prepare data from junit raw data
+> python dataprep.py JUnit #to prepare data from JUnit raw data
 > 
-> python dataprep.py jmh #to prepare data from jmh raw data
+> python dataprep.py JMH #to prepare data from JMH raw data
 
 ### 3. Generation of tests and benchmarks
 The systems to be analyzed can miss some of the tests and benchmarks classes that are necessary to correctly find the 
 issues. Not having a real knowledge of the system is a threat to manually writing tests and benchmarks. For these reasons
 LLMs are being used to complete the suites of tests and benchmarks. A prompt engineering process has been designed for
 this phase, involving the generation of an "ideal prompt" with meta-prompting techniques. Two main prompt are created
-throught their respecitve conversations with Copilot Web (Claude Sonnet 4.5), one for junit classes and one for jmh 
+throught their respecitve conversations with Copilot Web (Claude Sonnet 4.5), one for JUnit classes and one for JMH 
 classes. The obtained prompt are then involved in an ablation phase, to pick the best variant of the prompt:
 - **Ablation 0**: The prompt includes all the chosen prompt patterns (persona and few-shot);
 - **Ablation 1**: The prompt keeps the persona pattern but removes few-shot;
@@ -199,8 +199,8 @@ the generation, a "fallback" strategy is used with Copilot IDE Plugin (GPT-5 min
 asks the LLM to generate a test class for the given production class or to convert a test class in a benchmark one.
 
 For this phase, there are two scripts:
-- **generate_ju-test.sh**: generate a junit test class given the info about the production class and the prompt variant to use;
-- **generate_jmh-bench.sh**: generate a jmh bench class given the info about the production class and the prompt variant to use;
+- **generate_ju-test.sh**: generate a JUnit test class given the info about the production class and the prompt variant to use;
+- **generate_JMH-bench.sh**: generate a JMH bench class given the info about the production class and the prompt variant to use;
 
 All the generated tests and benchmarks for the ablations evaluation are located inside the **ablations/** folder
 
@@ -215,9 +215,9 @@ The input files for this algorithm are:
 - **test_cases_costs_all_programs.json**.
 
 To execute this algorithm run this command inside the folder:
-> python add_greedy.py junit #analyze junit data
+> python add_greedy.py JUnit #analyze JUnit data
 > 
-> python add_greedy.py jmh #analyze jmh data
+> python add_greedy.py JMH #analyze JMH data
 
 **div_ga/**: Contains the DIV-GA implementation. This algorithm creates a subset of the original test suite, selecting 
 a test case to insert in the subset by the best fitness function, based on statement coverage and execution time
@@ -229,9 +229,9 @@ The input files for this algorithm are:
 These files have to be copied inside the algorithm folder.
 
 To execute this algorithm run these commands inside the folder:
-> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_junit.m');exit;" #analyze junit data
+> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_JUnit.m');exit;" #analyze JUnit data
 > 
-> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_jmh.m');exit;" #analyze jmh data
+> matlab -nodisplay -nosplash -nodesktop -r "run('DIVGA_JMH.m');exit;" #analyze JMH data
 
 **igdec_qaoa**: Contains the IGDec-QAOA implementation. This algorithm creates a subset of the original test suite, 
 selecting a test case to insert in the subset by how it "impacts" the fitness function value.
@@ -239,9 +239,9 @@ The input files for this algorithm are:
 - **\<ProgramName>.csv**.
 
 To execute this algorithm run these commands inside the folder:
-> python noise_igdec_qaoa_tcs.py junit #noise simulator (junit data)
+> python noise_igdec_qaoa_tcs.py JUnit #noise simulator (JUnit data)
 > 
-> python noise_igdec_qaoa_tcs.py jmh #noise simulator (jmh data)
+> python noise_igdec_qaoa_tcs.py JMH #noise simulator (JMH data)
 
 **qaoa_tcs/**: Contains the QAOA-TCS implementation. This algorithm creates a subset of the original test suite 
 selecting a test case to insert in the subset from the created clusters, by a similarity function.
@@ -252,9 +252,9 @@ The input files for this algorithm are:
   - **total_program_lines_all_programs.json**
 
 To execute this algorithm run these command inside the folder:
-> python qaoa_tcs.py noise junit #noise simulator (junit data)
+> python qaoa_tcs.py noise JUnit #noise simulator (JUnit data)
 > 
-> python qaoa_tcs.py noise jmh #noise simulator (jmh data)
+> python qaoa_tcs.py noise JMH #noise simulator (JMH data)
 
 This phase can be automated by the **run_algorithms.sh** script located in the **scripts/** folder, that also automates
 the data processing phase.
