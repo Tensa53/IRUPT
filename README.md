@@ -38,6 +38,9 @@ approach. Based on the well balanced results obtained with DIV-GA and how easy i
 combination with the reliable measurements that can be done through microbenchmarking thanks to JMH, the downstream 
 approach with DIV-GA is the best configuration compared to all the others analyzed.
 
+
+For more detailed information, feel free to check the Thesis pdf.
+
 ## Method Workflow
 
 ### 0. Configuration Setup
